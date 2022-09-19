@@ -74,8 +74,10 @@ namespace COM3D2.MaidLoader
         /// </summary>
         private void Monitor()
         {
-            watcher = new FileSystemWatcher(modPath);
-            logger.LogInfo($"Monitoring started in {modPath}");
+            string monitoredFolder = useGlobal ? modPath : quickModPath;
+
+            watcher = new FileSystemWatcher(monitoredFolder);
+            logger.LogInfo($"Monitoring started in {monitoredFolder}");
 
             watcher.NotifyFilter = NotifyFilters.FileName
                                  | NotifyFilters.DirectoryName

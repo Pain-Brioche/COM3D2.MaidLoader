@@ -23,6 +23,7 @@ namespace COM3D2.MaidLoader
 
         private static bool loadKS = MaidLoader.loadScripts.Value;
         private static bool loadSounds = MaidLoader.loadSounds.Value;
+        private static bool useDedicatedSSFolder = MaidLoader.useDedicatedSSFolder.Value;
         private static bool loadArc = false;
 
         private static List<string> files = new();
@@ -35,6 +36,9 @@ namespace COM3D2.MaidLoader
             //Look for any .arc in the mod folder
             if (loadArc) { arcList = GetArc(); }
 
+            if (useDedicatedSSFolder & !Directory.Exists(modPath + "\\Scripts&Sounds"))
+                Directory.CreateDirectory(modPath + "\\Scripts&Sounds");
+
             if (loadKS || loadSounds)
             {
                 Stopwatch sw = Stopwatch.StartNew();
@@ -43,10 +47,12 @@ namespace COM3D2.MaidLoader
                 logger.LogInfo("Looking for files to load");
 
                 //Look for any .ks in the mod folder
-                if (loadKS) { files.AddRange(GetScripts()); }
+                if (loadKS)
+                    files.AddRange(GetScripts());
 
                 //Look for any .ogg in the mod folder
-                if (loadSounds) { files.AddRange(GetSounds()); }
+                if (loadSounds)
+                    files.AddRange(GetSounds());
 
                 sw.Stop();
                 logger.LogInfo($"Found {files.Count} file(s) in {sw.ElapsedMilliseconds}ms.");
@@ -168,9 +174,14 @@ namespace COM3D2.MaidLoader
         /// </summary>
         private static List<string> GetScripts()
         {
-            List<string> result = Directory.GetFiles(modPath, "*.ks", SearchOption.AllDirectories).ToList();
+            List<string> scripts = new List<string>();
 
-            return result;
+            if (useDedicatedSSFolder)
+                scripts = Directory.GetFiles(Path.Combine(gamePath, "Scripts&Sounds"), "*.ks", SearchOption.AllDirectories).ToList();                
+            else
+                scripts = Directory.GetFiles(modPath, "*.ks", SearchOption.AllDirectories).ToList();            
+
+            return scripts;
         }
 
         /// <summary>
@@ -178,9 +189,14 @@ namespace COM3D2.MaidLoader
         /// </summary>
         private static List<string> GetSounds()
         {
-            List<string> result = Directory.GetFiles(modPath, "*.ogg", SearchOption.AllDirectories).ToList();
+            List<string> sounds = new List<string>();
 
-            return result;
+            if (useDedicatedSSFolder)
+                sounds = Directory.GetFiles(Path.Combine(gamePath, "Scripts&Sounds"), "*.ogg", SearchOption.AllDirectories).ToList();
+            else
+                sounds = Directory.GetFiles(modPath, "*.ogg", SearchOption.AllDirectories).ToList();
+
+            return sounds;
         }
 
         /// <summary>
