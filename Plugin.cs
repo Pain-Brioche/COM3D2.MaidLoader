@@ -1,6 +1,9 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using COM3D2API;
+using System.Drawing;
+using System;
 using UnityEngine.SceneManagement;
 
 
@@ -9,11 +12,13 @@ namespace COM3D2.MaidLoader
     [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.0.0")]
     [BepInDependency("ShortStartLoader", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("COM3D2.CornerMessage", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency("deathweasel.com3d2.api", BepInDependency.DependencyFlags.HardDependency)]
+
     public class MaidLoader : BaseUnityPlugin
     {
         internal static ManualLogSource logger;
         internal static MaidLoader instance;
-        internal static QuickModGlobal quickModGlobal;
+        public static QuickMod quickMod;
 
         internal static bool SSL;
 
@@ -26,7 +31,7 @@ namespace COM3D2.MaidLoader
 
         // Quick Load options
         internal static ConfigEntry<bool> useQuickMod;
-        internal static ConfigEntry<bool> useGlobal;
+        internal static ConfigEntry<bool> useModFolder;
         internal static ConfigEntry<string> quickModFolder;
         internal static ConfigEntry<int> quickModTimer;
 
@@ -41,7 +46,7 @@ namespace COM3D2.MaidLoader
 
             //QuickMod options
             useQuickMod = Config.Bind("QuickMod", "Use QuickMod", true, "Use the Dynamic Mod Loading system");
-            useGlobal = Config.Bind("QuickMod", "Use Global QuickMod", false, "Disable to use a dedicated QuickMod folder (A dedicated folder is faster");
+            useModFolder = Config.Bind("QuickMod", "Use standard Mod folder for QuickMod", false, "Disable to use a dedicated QuickMod folder (A dedicated folder is faster");
 
             //Advanced
             quickModFolder = Config.Bind("QuickMod Advanced", "QuickMod folder Name", "Mod_QuickMod", new ConfigDescription("Dedicated QuickMod folder name", null, "Advanced"));
@@ -61,6 +66,15 @@ namespace COM3D2.MaidLoader
 
             // Check if CornderMessage is loaded.
             CornerMessage.CornerMessageLoaded = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("COM3D2.CornerMessage");
+
+            // Add gear menu button
+            SystemShortcutAPI.AddButton("QuickMod", () =>
+            {
+
+                if (quickMod != null)
+                    quickMod.Refresh();
+
+            }, "Refresh new mods", Convert.FromBase64String(icon));
 
             //Only load dummy .arc when needed
             if (loadScripts.Value || loadSounds.Value)
@@ -96,9 +110,22 @@ namespace COM3D2.MaidLoader
         {
             if (scene.buildIndex == 5 && useQuickMod.Value)
             {
-                quickModGlobal = new QuickModGlobal();
+                quickMod = new QuickMod();
             }
         }
+
+        private static readonly string icon = "iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEh" +
+            "ZcwAADsMAAA7DAcdvqGQAAANRSURBVEhLtVZdL2NRFF1FQpsiOmglgiA0fRIkTXjzNsb3TPso/oX/4Nlf8GA0KmTGkycRwpD4mPqOF4miJb46EXRmr3NvxW17TZvo" +
+            "Snbce7budc9ee+9zLADsYuViTrFPYlaxPLGPQFwsJnYlFhaLiqG2paXFt7W19ftvjrC8vPyLHMJVR0IvF3RfzsANkYsp/SzvP8mca1gsli8k/CqEAW0pFeLDy8sLL" +
+            "i8vsba2hoODA1xdURKgrKwMzc3NaG9vR2VlJfLz8xlU+dJBfN/o9UnQ79qSESRj8KWlJayvr6OiogJutxvl5awxIBKJYH9/HxcXF2hra0NnZyccDocpqaz73yVkwL" +
+            "m5OcRiMXR1dand5OUZCzgej6tdLywswGazoaenR31YOpDQtPxvb28xPT2tAvp8PrWzZDKCa/T5/X71zt/c3Nyo53QwJaRe19fX6OvrU/q8pw3BXfX29uLu7g6Li4t" +
+            "4fn7WPZo0CZgSlpaWYmhoyDQ96UBtBwYGsLOzg7OzM33VCFNCaVQ0Njbqb5mjvr4eVVVV2NvbM+wsAVPCgoKC/6YxGWwfEnk8Hpyeniotj46ODHFSCPmj+/t7gwaZ" +
+            "4vHxEZOTk9je3sbDwwNmZmYwPz+vezUYCFmR/OexsTHVd9nCarVieHgYm5ubKs7h4SH6+/t1rwYDIdMwNTWF8/NzTExMYHd3N60OZmDqGhoaMDIyApfLpdqpurpa9" +
+            "2owNP74+DiKi4tVadvtdhwfH2N0dFQ9ZwPKwfQWFRWpcZcAG/+VkDs5OTlRpR0MBtHU1KRmJSuVBfQRIKEhpSxp7rCmpkalk6TZkvHDn56e9LdUvBImSpd/OTM5kD" +
+            "kjswVl2NjYMNU+pS0Ip9OpGp9lzQLKFDzCKEfWs5RCd3R0qLE2OzuLcDj8brXSx4zwZOFI9Hq9rxlLRlpCoqSkRM3FwsJCBAIBhEIhNRSSwd6l3mwnkgwODipSMxj" +
+            "aIhn8cp4YKysrWF1dVVX79gCORqPqAOa5yVOfWcnkAM7oisHgnD4sJD4TDM5Kbm1tVenP9IrRLUF/aEu5hRB2U8OozL2QtpQ7iCwczur2VcdLai7vpryT6hfhWqaU" +
+            "g5JXfJeYQ8wmZlq9WYJX/T9iFF0aGpF/xkebiKWAI/AAAAAASUVORK5CYII=";
+
     }
 
     // CornerMessage support the way it's intended to be used.
@@ -118,5 +145,4 @@ namespace COM3D2.MaidLoader
             internal static void DisplayMessage(string mess, float dur) => COM3D2.CornerMessage.Main.DisplayMessage(mess, dur);
         }
     }
-
 }

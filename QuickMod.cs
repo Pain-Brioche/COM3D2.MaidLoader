@@ -7,28 +7,33 @@ using System.Diagnostics;
 using HarmonyLib;
 using UnityEngine;
 using BepInEx.Logging;
-using BepInEx;
+using COM3D2API;
 
 namespace COM3D2.MaidLoader
 {
-    internal class QuickMod
+    public class QuickMod
     {
         private ManualLogSource logger = MaidLoader.logger;
         private FileSystemWatcher watcher;
 
-        private List<string> addedMenus = new List<string>();
-        private static string gamePath = UTY.gameProjectPath;
-        private static string quickModFolder = "Mod_QuickLoad";
+        private List<string> addedMenus = new();
+        private List<string> updatedPath = new();
+        private static string gamePath = UTY.gameProjectPath.Replace('/', '\\');
+        private static string modPath = Path.Combine(gamePath, "Mod");
+        private static string quickModFolder = MaidLoader.quickModFolder.Value;
         private static string quickModPath = Path.Combine(gamePath, quickModFolder);
+        private static int quickModTimer = MaidLoader.quickModTimer.Value * 1000;
+        private static readonly string[] validFiles = { ".menu", ".tex", ".model", ".mate", "*.psk" };
+
+        private bool useModFolder = MaidLoader.useModFolder.Value;
 
         private bool rebuildFileSystem = false;
-
-        private Stopwatch waitTimer = new Stopwatch();
+        //private Stopwatch waitTimer = new Stopwatch();
 
         private static Harmony harmony;
         private static Harmony harmony2;
 
-        public static FileSystemWindows qlFileSystem = new();
+        public static FileSystemWindows qmFileSystem = new();
 
 
         internal QuickMod()
@@ -40,29 +45,44 @@ namespace COM3D2.MaidLoader
         {
             harmony2 = Harmony.CreateAndPatchAll(typeof(FileSystemModPatch));
 
-            UpdateFileSystem();
+            if (!useModFolder && !Directory.Exists(quickModPath))
+                Directory.CreateDirectory(quickModPath);
 
-            InitMenu();
 
-            //Starts a Coroutine to periodically check if items were added.
-            MaidLoader.instance.StartCoroutine(CheckNewFileCO());
+            if (useModFolder)
+            {
+                //Get all registered files that already existed at game launch to avoid doubles
+                List<string> menus = GameUty.FileSystemMod.GetFileListAtExtension("menu").ToList();
+                foreach (string menu in menus)
+                    addedMenus.Add(Path.GetFileName(menu));
+            }
+            else
+            {
+                logger.LogInfo("Updating QM File System");
+                //Gather items already in QuickMod's folder if global load isn't used.
+                UpdateFileSystem();
+                InitMenu();
+            }
+
+            //Starts a Coroutine to periodically check if files were added.
+            //MaidLoader.instance.StartCoroutine(AutomaticRefreshCO());
 
             Monitor();
         }
 
         /// <summary>
-        /// Monitor changes in QuickMod folder
+        /// Monitor changes in the Mod folder
         /// </summary>
         private void Monitor()
         {
-            watcher = new FileSystemWatcher(quickModPath);
-            logger.LogInfo($"Monitoring started in {quickModPath}");
+            string monitoredFolder = useModFolder ? modPath : quickModPath;
+
+            watcher = new FileSystemWatcher(monitoredFolder);
+            logger.LogInfo($"Monitoring started in {monitoredFolder}");
 
             watcher.NotifyFilter = NotifyFilters.FileName
                                  | NotifyFilters.DirectoryName
-                                 | NotifyFilters.CreationTime
-                                 | NotifyFilters.LastWrite
-                                 | NotifyFilters.Size;
+                                 | NotifyFilters.CreationTime;
 
 
             watcher.Filter = "*.*";
@@ -70,7 +90,7 @@ namespace COM3D2.MaidLoader
             watcher.Changed += OnFileChanged;
             watcher.Renamed += OnFileChanged;
             watcher.Created += OnFileChanged;
-            watcher.Deleted += OnFileDeleted;
+            //watcher.Deleted += OnFileDeleted;
 
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
@@ -78,24 +98,20 @@ namespace COM3D2.MaidLoader
 
         /// <summary>
         /// Triggered on events raised by the monitor
-        /// </summary>
+        /// Checks if the files added are relevant to mods and them to the refresh queue
         private void OnFileChanged(object sender, FileSystemEventArgs e)
         {
-            string[] validFiles = { ".menu", ".tex", ".model", ".mate", ".pmat" };
-
             if (validFiles.Contains(Path.GetExtension(e.FullPath)))
             {
-                if(!waitTimer.IsRunning)
-                    waitTimer.Start();
-                else
-                {
-                    waitTimer.Reset();
-                    waitTimer.Start();
-                }
+                string path = Path.GetDirectoryName(e.FullPath);
 
-                rebuildFileSystem = true;
-                logger.LogInfo($"File added: {Path.GetFileName(e.FullPath)}");
-            }                            
+                string relativePath = path.Replace(gamePath, string.Empty);
+
+                if (!updatedPath.Contains(relativePath))
+                    updatedPath.Add(relativePath);
+
+                logger.LogInfo($"New file detected: {Path.GetFileName(e.FullPath)}");
+            }
         }
 
 
@@ -104,61 +120,96 @@ namespace COM3D2.MaidLoader
             logger.LogWarning($"COM's FileSystem does NOT support deleting mods!\nAny item using {Path.GetFileName(e.FullPath)} will give an error unless a replacement is found.");
         }
 
+        /*
         /// <summary>
         /// Periodically checks if the files system needs to be rebuilt.
         /// Rebuild it if needed and x seconds ellapsed since last trigger.
         /// </summary>
-        private IEnumerator CheckNewFileCO()
+        private IEnumerator AutomaticRefreshCO()
         {
-            for (;;)
+            for (; ; )
             {
                 if (rebuildFileSystem)
                 {
-                    if(waitTimer.ElapsedMilliseconds >= 5000)
+                    if (waitTimer.ElapsedMilliseconds >= quickModTimer)
                     {
                         Stopwatch sw = new Stopwatch();
                         sw.Start();
-                        UpdateFileSystem();
+
+                        logger.LogInfo("Updating QM File System");
+                        // Rebuild the qmFileSystem
+                        if (useModFolder)
+                        {
+                            UpdateFileSystemGlobal();
+                        }
+                        else
+                        {
+                            UpdateFileSystem();
+                        }
+
+                        //Parse added .menu
                         InitMenu();
                         sw.Stop();
+
+                        CornerMessage.DisplayMessage("New files added.", 6);
                         logger.LogInfo($"QM File System updated in {sw.ElapsedMilliseconds}ms");
+
                         waitTimer.Reset();
                         rebuildFileSystem = false;
                     }
                     else
                     {
-                        logger.LogInfo($"Adding new files in {5000 - waitTimer.ElapsedMilliseconds}ms");
+                        string message = $"Adding new files in {Math.Round((double)((quickModTimer - waitTimer.ElapsedMilliseconds) / 1000))}s";
+                        CornerMessage.DisplayMessage(message, 1);
+                        logger.LogInfo(message);
                     }
                 }
                 yield return new WaitForSeconds(1);
             }
         }
+        */
 
-        /// <summary>
-        /// Build the basic needed for a FileSystemWindows FileSystem.
-        /// </summary>
-        private void UpdateFileSystem()
+        public void Refresh()
         {
-            FileSystemWindows oldFS = qlFileSystem;
-            // Making a new FileSystem because Dispose() crashes the game... Not ideal.
-            qlFileSystem = new();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
             logger.LogInfo("Updating QM File System");
-            if (Directory.Exists(quickModPath))
-            {
-                qlFileSystem.SetBaseDirectory(gamePath);
-                qlFileSystem.AddFolder(quickModFolder);
+            UpdateFileSystem();
 
-                string[] files = qlFileSystem.GetList(string.Empty, AFileSystemBase.ListType.AllFolder);
-                foreach (string file in files)
-                {
-                    if (qlFileSystem.AddAutoPath(file))
-                    {
-                        //logger.LogMessage($"{file} AddAutoPath");
-                    }
-                }
+            //Parse added .menu
+            InitMenu();
+            sw.Stop();
+
+            CornerMessage.DisplayMessage("Refresh done, new files added.", 6);
+            logger.LogInfo($"QM File System updated in {sw.ElapsedMilliseconds}ms");
+
+            rebuildFileSystem = false;
+        }
+
+
+        // Build the basic needed for a new FileSystem
+        // Don't forget than COM's FileSystem works on a folder basis relative to the game's path.
+        // This is the bit that is more likely to break.
+        private void UpdateFileSystem()
+        {
+            // keep the old FS to delete later
+            FileSystemWindows oldFS = qmFileSystem;
+            qmFileSystem = new();
+
+            qmFileSystem.SetBaseDirectory(gamePath);
+
+           foreach (string str in updatedPath)
+               qmFileSystem.AddFolder(str);
+
+           string[] folders = qmFileSystem.GetList(string.Empty, AFileSystemBase.ListType.AllFolder);
+            foreach (string folder in folders)
+            {
+                if (qmFileSystem.AddAutoPath(folder))
+                    logger.LogInfo($"Folder added: {Path.GetFileName(folder)}");
             }
 
+           // delete the old FS
             oldFS.Dispose();
         }
 
@@ -168,7 +219,7 @@ namespace COM3D2.MaidLoader
         private void InitMenu()
         {
             // Get all .menu from QuickMod FileSystem
-            List<string> files = qlFileSystem.GetFileListAtExtension("menu").ToList();
+            List<string> files = qmFileSystem.GetFileListAtExtension("menu").ToList();
 
             if (files.Count == 0 || files == null)
                 return;
@@ -176,6 +227,9 @@ namespace COM3D2.MaidLoader
             //Remove already added .menu
             foreach (string file in addedMenus)
                 files.Remove(file);
+
+            if (files.Count == 0)
+                return;
 
             foreach (string menu in files)
                 logger.LogInfo($"New menu found: {menu}");
@@ -190,7 +244,6 @@ namespace COM3D2.MaidLoader
             // Go through all added .menu and add them to the already existing SceneEdit lists
             foreach (string strFileName in files)
             {
-                logger.LogMessage(strFileName);
                 SceneEdit.SMenuItem mi = new SceneEdit.SMenuItem();
 
                 // Parse the actual .menu
@@ -209,7 +262,7 @@ namespace COM3D2.MaidLoader
                             sceneEdit.m_menuRidDic.Add(mi.m_nMenuFileRID, mi);
                         }
 
-                        // check for _Zn parents. Currently does nothing as mods aren't stacked anyway.
+                        // check for _Zn parents.
                         string parentMenuName = SceneEdit.GetParentMenuFileName(mi);
                         if (!string.IsNullOrEmpty(parentMenuName))
                         {
@@ -229,16 +282,16 @@ namespace COM3D2.MaidLoader
                             mi.m_listMember.Add(mi);
                         }
                     }
-                } 
+                }
                 addedMenus.Add(strFileName);
             }
 
             // Deals with .mod and sub menus
             sceneEdit.StartCoroutine(sceneEdit.FixedInitMenu(menuList, sceneEdit.m_menuRidDic, menuGroupMemberDic));
-            sceneEdit.StartCoroutine(sceneEdit.CoLoadWait());            
-        }       
+            sceneEdit.StartCoroutine(sceneEdit.CoLoadWait());
+        }
 
-        
+
         internal class InitPatch
         {
             // Wait for the edit mode to finish loading entirely before doing anything, this is done so QL doesn't interfere with normal load times.
@@ -246,10 +299,10 @@ namespace COM3D2.MaidLoader
             [HarmonyPostfix]
             internal static void OnCompleteFadeIn_Postfix()
             {
-                //MaidLoader.quickMod.Start();
+                MaidLoader.quickMod.Start();
             }
         }
-        
+
 
         internal class FileSystemModPatch
         {
@@ -260,12 +313,12 @@ namespace COM3D2.MaidLoader
             {
                 if (__result == null)
                 {
-                    bool exists = qlFileSystem.IsExistentFile(fileName);
+                    bool exists = qmFileSystem.IsExistentFile(fileName);
 
                     if (!exists)
                         MaidLoader.logger.LogMessage($"{fileName} doesn't exist");
                     else
-                        __result = qlFileSystem.FileOpen(fileName);
+                        __result = qmFileSystem.FileOpen(fileName);
                 }
             }
         }
