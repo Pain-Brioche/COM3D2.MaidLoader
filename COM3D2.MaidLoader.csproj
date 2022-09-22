@@ -34,5 +34,8 @@
     <Reference Include="COM3D2.ShortStartLoader">
       <HintPath>Libs\COM3D2.ShortStartLoader-Publicized.dll</HintPath>
     </Reference>
+    <Reference Include="System.Threading">
+      <HintPath>Libs\System.Threading.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

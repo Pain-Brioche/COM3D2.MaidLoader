@@ -72,7 +72,7 @@ namespace COM3D2.MaidLoader
             {
 
                 if (quickMod != null)
-                    quickMod.Refresh();
+                    MaidLoader.instance.StartCoroutine(quickMod.Refresh());
 
             }, "Refresh new mods", Convert.FromBase64String(icon));
 

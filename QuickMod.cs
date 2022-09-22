@@ -7,7 +7,7 @@ using System.Diagnostics;
 using HarmonyLib;
 using UnityEngine;
 using BepInEx.Logging;
-using COM3D2API;
+using System.Threading.Tasks;
 
 namespace COM3D2.MaidLoader
 {
@@ -27,8 +27,8 @@ namespace COM3D2.MaidLoader
 
         private bool useModFolder = MaidLoader.useModFolder.Value;
 
-        private bool rebuildFileSystem = false;
-        //private Stopwatch waitTimer = new Stopwatch();
+        private Stopwatch waitTimer = new Stopwatch();
+        private static bool isUpdated = true;
 
         private static Harmony harmony;
         private static Harmony harmony2;
@@ -58,7 +58,6 @@ namespace COM3D2.MaidLoader
             }
             else
             {
-                logger.LogInfo("Updating QM File System");
                 //Gather items already in QuickMod's folder if global load isn't used.
                 UpdateFileSystem();
                 InitMenu();
@@ -140,7 +139,7 @@ namespace COM3D2.MaidLoader
                         // Rebuild the qmFileSystem
                         if (useModFolder)
                         {
-                            UpdateFileSystemGlobal();
+                            UpdateFileSystem();
                         }
                         else
                         {
@@ -169,22 +168,25 @@ namespace COM3D2.MaidLoader
         }
         */
 
-        public void Refresh()
+        //Just checks the value of isUpdated, used for the yield bellow
+        private bool IsUpdated() => isUpdated;
+
+        public IEnumerator Refresh()
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            logger.LogInfo("Updating QM File System");
+            // wait for UpdateFileSystem to be done
+            isUpdated = false;
             UpdateFileSystem();
-
+            yield return new WaitUntil(IsUpdated);
+             
             //Parse added .menu
             InitMenu();
             sw.Stop();
 
             CornerMessage.DisplayMessage("Refresh done, new files added.", 6);
             logger.LogInfo($"QM File System updated in {sw.ElapsedMilliseconds}ms");
-
-            rebuildFileSystem = false;
         }
 
 
@@ -193,24 +195,32 @@ namespace COM3D2.MaidLoader
         // This is the bit that is more likely to break.
         private void UpdateFileSystem()
         {
-            // keep the old FS to delete later
-            FileSystemWindows oldFS = qmFileSystem;
-            qmFileSystem = new();
-
-            qmFileSystem.SetBaseDirectory(gamePath);
-
-           foreach (string str in updatedPath)
-               qmFileSystem.AddFolder(str);
-
-           string[] folders = qmFileSystem.GetList(string.Empty, AFileSystemBase.ListType.AllFolder);
-            foreach (string folder in folders)
+            // Start this as a separate thread
+            Task.Factory.StartNew(() =>
             {
-                if (qmFileSystem.AddAutoPath(folder))
-                    logger.LogInfo($"Folder added: {Path.GetFileName(folder)}");
-            }
+                logger.LogInfo("Updating QM File System");
+                FileSystemWindows newFS = new();
 
-           // delete the old FS
-            oldFS.Dispose();
+                newFS.SetBaseDirectory(gamePath);
+
+                foreach (string str in updatedPath)
+                    newFS.AddFolder(str);
+
+                string[] folders = newFS.GetList(string.Empty, AFileSystemBase.ListType.AllFolder);
+                foreach (string folder in folders)
+                {
+                    if (newFS.AddAutoPath(folder))
+                        logger.LogInfo($"Folder added: {Path.GetFileName(folder)}");
+                }
+
+                // keep the old FS to delete later
+                FileSystemWindows oldFS = qmFileSystem;
+                qmFileSystem = newFS;
+
+                // delete the old FS
+                oldFS.Dispose();
+            });
+            isUpdated = true;
         }
 
         /// <summary>
