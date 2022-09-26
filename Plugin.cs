@@ -29,31 +29,33 @@ namespace COM3D2.MaidLoader
         internal static ConfigEntry<bool> useCustomModOverride;
         internal static ConfigEntry<bool> useDedicatedSSFolder;
 
-        // Quick Load options
+        // QuickMod options
         internal static ConfigEntry<bool> useQuickMod;
         internal static ConfigEntry<bool> useModFolder;
-        internal static ConfigEntry<string> quickModFolder;
+        internal static ConfigEntry<string> quickModPath;
         internal static ConfigEntry<int> quickModTimer;
+        internal static ConfigEntry<bool> quickModAutoRefresh;
 
 
         private void Awake()
         {
             // Load config
             //Startup options
-            loadScripts = Config.Bind("Startup options", "Load scripts (.ks)", true, "Whether or not .ks from the Mod folder will be loaded, disabling this can improve loading time.");
-            loadSounds = Config.Bind("Startup options", "Load sounds (.ogg)", true, "Whether or not .ogg from the Mod folder will be loaded, disabling this can improve loading time.");
+            loadScripts = Config.Bind("General", "Load scripts (.ks)", true, "Whether or not .ks from the Mod folder will be loaded, disabling this can improve loading time.");
+            loadSounds = Config.Bind("General", "Load sounds (.ogg)", true, "Whether or not .ogg from the Mod folder will be loaded, disabling this can improve loading time.");
 
 
             //QuickMod options
-            useQuickMod = Config.Bind("QuickMod", "Use QuickMod", true, "Use the Dynamic Mod Loading system");
-            useModFolder = Config.Bind("QuickMod", "Use standard Mod folder for QuickMod", false, "Disable to use a dedicated QuickMod folder (A dedicated folder is faster");
+            useQuickMod = Config.Bind("QuickMod", "1. Use QuickMod", true, "Use the Dynamic Mod Loading system");
+            useModFolder = Config.Bind("QuickMod", "2. Use standard Mod", false, "Disable to use a dedicated QuickMod folder (A dedicated folder is faster");
+            quickModPath = Config.Bind("QuickMod", "3. Custom Mod folder", "Mod_QuickMod" , "Dedicated QuickMod folder to monitor");
+            quickModAutoRefresh = Config.Bind("QuickMod", "4. Auto refresh", false, "If enabled mods will be automatically refresh x seconds after the last file is added.");
+            quickModTimer = Config.Bind("QuickMod Advanced", "5. Auto refresh delay", 5, new ConfigDescription("How many seconds to wait after last file was added before updating the FileSystem, setting this too low may result in incomplte refresh or ignored files", new AcceptableValueRange<int>(1, 60), "Advanced"));
 
             //Advanced
-            quickModFolder = Config.Bind("QuickMod Advanced", "QuickMod folder Name", "Mod_QuickMod", new ConfigDescription("Dedicated QuickMod folder name", null, "Advanced"));
-            quickModTimer = Config.Bind("QuickMod Advanced", "Seconds before regfresh", 5, new ConfigDescription("How many seconds to wait after last file was added before updating the FileSystem, setting this too low may result in incomplte refresh or ignored files", new AcceptableValueRange<int>(1, 60), "Advanced"));
-            useModOverride = Config.Bind("Startup Advanced", "Enable Mod override", true, new ConfigDescription("Whether or not mods can replace game's assets, DEBUG ONLY!", null, "Advanced"));
-            useCustomModOverride = Config.Bind("Startup Advanced", "Enable Custom Mod override", true, new ConfigDescription("Disable to use game's built-in ModPriority, Usefull to disable some unwanted mod behaviour", null, "Advanced"));
-            useDedicatedSSFolder = Config.Bind("Startup Advanced", "Use a specific folder for Scripts and Sounds", false, new ConfigDescription("Use a specific folder to look Scripts and Sounds into", null, "Advanced"));
+            useModOverride = Config.Bind("Advanced", "Enable Mod override", true, new ConfigDescription("Whether or not mods can replace game's assets, DEBUG ONLY!", null, "Advanced"));
+            useCustomModOverride = Config.Bind("Advanced", "Enable Custom Mod override", true, new ConfigDescription("Disable to use game's built-in ModPriority, Usefull to disable some unwanted mod behaviour", null, "Advanced"));
+            useDedicatedSSFolder = Config.Bind("Advanced", "Use a specific folder for Scripts and Sounds", false, new ConfigDescription("Use a specific folder to look Scripts and Sounds into", null, "Advanced"));
 
             instance = this;
             SceneManager.sceneLoaded += OnSceneLoaded;
