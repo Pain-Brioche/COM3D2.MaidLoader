@@ -83,7 +83,7 @@ namespace COM3D2.MaidLoader
         /// <param name="arcList">.arc found in the mod folder</param>
         /// <param name="addCustomArc">add a custom .arc for special files</param>
         /// <returns></returns>
-        internal static List<CodeInstruction> GetEdited(List<CodeInstruction> rawIL, bool addCustomArc = true)
+        internal static List<CodeInstruction> GetEdited(List<CodeInstruction> rawIL,string lastArc = "parts2", bool addCustomArc = true)
         {
             var ILBlock = new List<CodeInstruction>();
             var editedIL = new List<CodeInstruction>(rawIL);
@@ -97,7 +97,7 @@ namespace COM3D2.MaidLoader
             for (int i = 0; i < rawIL.Count; i++)
             {
                 // Look for "parts2" latest .arc loaded by the game at any time.
-                if (rawIL[i].operand as string == "parts2")
+                if (rawIL[i].operand as string == lastArc)
                 {
 
                     // make a line IL block for each .arc to load.
@@ -118,12 +118,12 @@ namespace COM3D2.MaidLoader
                     //Inject that bit of IL back
                     editedIL.InsertRange(i + 3, ILBlock);
 
-                    /*
-                    for (int k = 0; k < rawIL.Count; k++)
+                    
+                    for (int k = 0; k < editedIL.Count; k++)
                     {
-                        Main.logger.LogWarning(editedIL[k].opcode + " " + editedIL[k].operand);
+                        logger.LogWarning($"New IL: {editedIL[k].opcode} {editedIL[k].operand}");
                     }
-                    */
+                    
 
                     return editedIL;
                 }
@@ -135,8 +135,6 @@ namespace COM3D2.MaidLoader
                 Main.logger.LogWarning(rawIL[i].opcode + " " + rawIL[i].operand);
             }
             */
-
-            logger.LogMessage("No additional .arc found");
             return rawIL;
         }
 
@@ -227,7 +225,7 @@ namespace COM3D2.MaidLoader
             var codes = new List<CodeInstruction>(instructions);
 
             //Returns an edited block of IL code with additional .arc to load
-            codes = ArcManager.GetEdited(codes);
+            codes = ArcManager.GetEdited(codes, "parts2");
 
             return codes;
         }
@@ -240,7 +238,7 @@ namespace COM3D2.MaidLoader
             var codes = new List<CodeInstruction>(instructions);
 
             //Returns an edited block of IL code with additional .arc to load
-            codes = ArcManager.GetEdited(codes);
+            codes = ArcManager.GetEdited(codes, "parts-en2");
 
             return codes;
         }
@@ -256,7 +254,7 @@ namespace COM3D2.MaidLoader
             var codes = new List<CodeInstruction>(instructions);
 
             //Returns an edited block of IL code with additional .arc to load
-            codes = ArcManager.GetEdited(codes);
+            codes = ArcManager.GetEdited(codes, "parts2");
 
             return codes;
         }

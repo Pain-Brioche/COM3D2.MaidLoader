@@ -39,6 +39,11 @@ namespace COM3D2.MaidLoader
 
         private void Awake()
         {
+            instance = this;
+
+            //BepinEx loggin
+            logger = Logger;
+
             // Load config
             //Startup options
             loadScripts = Config.Bind("General", "Load scripts (.ks)", true, "Whether or not .ks from the Mod folder will be loaded, disabling this can improve loading time.");
@@ -47,21 +52,18 @@ namespace COM3D2.MaidLoader
 
             //QuickMod options
             useQuickMod = Config.Bind("QuickMod", "1. Use QuickMod", true, "Use the Dynamic Mod Loading system");
-            useModFolder = Config.Bind("QuickMod", "2. Use standard Mod", false, "Disable to use a dedicated QuickMod folder (A dedicated folder is faster");
+            useModFolder = Config.Bind("QuickMod", "2. Use standard Mod folder", false, "Disable to use a dedicated QuickMod folder (A dedicated folder is faster");
             quickModPath = Config.Bind("QuickMod", "3. Custom Mod folder", "Mod_QuickMod" , "Dedicated QuickMod folder to monitor");
             quickModAutoRefresh = Config.Bind("QuickMod", "4. Auto refresh", false, "If enabled mods will be automatically refresh x seconds after the last file is added.");
-            quickModTimer = Config.Bind("QuickMod Advanced", "5. Auto refresh delay", 5, new ConfigDescription("How many seconds to wait after last file was added before updating the FileSystem, setting this too low may result in incomplte refresh or ignored files", new AcceptableValueRange<int>(1, 60), "Advanced"));
+            quickModTimer = Config.Bind("QuickMod Advanced", "Auto refresh delay", 5, new ConfigDescription("How many seconds to wait after last file was added before updating the FileSystem, setting this too low may result in incomplte refresh or ignored files", new AcceptableValueRange<int>(1, 60), "Advanced"));
 
             //Advanced
             useModOverride = Config.Bind("Advanced", "Enable Mod override", true, new ConfigDescription("Whether or not mods can replace game's assets, DEBUG ONLY!", null, "Advanced"));
             useCustomModOverride = Config.Bind("Advanced", "Enable Custom Mod override", true, new ConfigDescription("Disable to use game's built-in ModPriority, Usefull to disable some unwanted mod behaviour", null, "Advanced"));
             useDedicatedSSFolder = Config.Bind("Advanced", "Use a specific folder for Scripts and Sounds", false, new ConfigDescription("Use a specific folder to look Scripts and Sounds into", null, "Advanced"));
 
-            instance = this;
-            SceneManager.sceneLoaded += OnSceneLoaded;
 
-            //BepinEx loggin
-            logger = Logger;
+            SceneManager.sceneLoaded += OnSceneLoaded;
 
             // Check if ShortStartLoader is loaded
             SSL = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("ShortStartLoader");
@@ -72,7 +74,6 @@ namespace COM3D2.MaidLoader
             // Add gear menu button
             SystemShortcutAPI.AddButton("QuickMod", () =>
             {
-
                 if (quickMod != null)
                     MaidLoader.instance.StartCoroutine(quickMod.Refresh());
 

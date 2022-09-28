@@ -25,17 +25,18 @@ namespace COM3D2.MaidLoader
         private bool isNeedRefresh = false;
 
         private static string gamePath = UTY.gameProjectPath.Replace('/', '\\');
+        private static string modPath = Path.Combine(gamePath, "Mod");
         private static string customModPath = MaidLoader.quickModPath.Value;
         private static string quickModFolderPath;
 
-        private static readonly string[] validFiles = { ".menu", ".tex", ".model", ".mate", "*.psk" };
+        private static readonly string[] validFiles = { ".menu", ".tex", ".model", ".mate", "*.psk", "*.phy", "*.anm" };
 
         private int waitTimer = MaidLoader.quickModTimer.Value;
 
         private static Harmony harmony;
-        private static Harmony harmony2;
+        //private static Harmony harmony2;
 
-        public static FileSystemWindows qmFileSystem = new();
+        public FileSystemWindows qmFileSystem = new();
 
 
         internal QuickMod()
@@ -45,12 +46,14 @@ namespace COM3D2.MaidLoader
 
         private void Start()
         {
-            harmony2 = Harmony.CreateAndPatchAll(typeof(FileSystemModPatch));
+            logger.LogInfo("Starting QuickMod");
+            //harmony2 = Harmony.CreateAndPatchAll(typeof(FileSystemModPatch));
 
             quickModFolderPath = GetQuickModFolderPath();
+            logger.LogInfo($"QuickMod folder: {quickModFolderPath}");
 
 
-            if (useModFolder)
+            if (quickModFolderPath.Contains(modPath))
             {
                 //Get all registered files that already existed at game launch to avoid doubles
                 List<string> menus = GameUty.FileSystemMod.GetFileListAtExtension("menu").ToList();
@@ -59,9 +62,8 @@ namespace COM3D2.MaidLoader
             }
             else
             {
-                //Gather items already in QuickMod's folder if global load isn't used.
-                UpdateFileSystem();
-                InitMenu();
+                //Gather items already in QuickMod's folder if standard mod load isn't used.
+                Refresh();
             }
 
             // Starts folder monitoring as a separate thread
@@ -82,7 +84,7 @@ namespace COM3D2.MaidLoader
         /// </summary>
         private string GetQuickModFolderPath()
         {
-            string path = Path.Combine(gamePath, "Mod");
+            string path = modPath;
               
             if (!useModFolder)
             {
@@ -105,7 +107,7 @@ namespace COM3D2.MaidLoader
                     catch (IOException e)
                     {
                         logger.LogError("QuickMod folder couldn't be found or created!\n\t\t  Standard mod folder will be used instead." + e.Message);
-                        path = Path.Combine(gamePath, "Mod");
+                        path = modPath;
                     }
                 }
             }
@@ -151,7 +153,7 @@ namespace COM3D2.MaidLoader
                 if (!updatedPath.Contains(relativePath))
                     updatedPath.Add(relativePath);
 
-                logger.LogInfo($"New file detected: {Path.GetFileName(e.FullPath)}");
+                //logger.LogInfo($"New file detected: {Path.GetFileName(e.FullPath)}");
 
                 waitTimer = MaidLoader.quickModTimer.Value;
                 isNeedRefresh = true;
@@ -341,7 +343,7 @@ namespace COM3D2.MaidLoader
             }
         }
 
-
+        /*
         internal class FileSystemModPatch
         {
             // Patch GameUty.FileOpen to also look inside QuickMod FileSystem.
@@ -360,5 +362,6 @@ namespace COM3D2.MaidLoader
                 }
             }
         }
+        */
     }
 }

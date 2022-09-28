@@ -4,8 +4,7 @@ using System.Linq;
 
 namespace COM3D2.MaidLoader
 {
-    //Look into GameUty.FileSystemMod before GameUty.FileSystem
-    //Sadly while this works for many
+    //Look into MaidLoader.QuickMod before GameUty.FileSystemMod before GameUty.FileSystem
     internal class ModPriority
     {
         private static Harmony harmony;
@@ -16,12 +15,21 @@ namespace COM3D2.MaidLoader
         }
 
         /// <summary>
-        /// Checks if the file exists in FileSystemMod before FileSystem.
+        /// Checks if the file exists in QuickMod before FileSystemMod before FileSystem.
         /// </summary>
         [HarmonyPatch(typeof(FileSystemArchive), nameof(FileSystemArchive.IsExistentFile))]
         [HarmonyPrefix]
         public static bool IsExistentFile_Prefix(string file_name, ref bool __result)
         {
+            if (MaidLoader.quickMod != null)
+            {
+                if (MaidLoader.quickMod.qmFileSystem != null && MaidLoader.quickMod.qmFileSystem.IsExistentFile(file_name))
+                {
+                    __result = true;
+                    return false;
+                }
+            }
+
             if (GameUty.FileSystemMod != null && GameUty.FileSystemMod.IsExistentFile(file_name))
             {
                 __result = true;
@@ -31,12 +39,21 @@ namespace COM3D2.MaidLoader
         }
 
         /// <summary>
-        /// Load a file by name from FileSystemMod before FileSystem.
+        /// Load a file by name from QuickMod before FileSystemMod before FileSystem.
         /// </summary>
         [HarmonyPatch(typeof(FileSystemArchive), nameof(FileSystemArchive.FileOpen))]
         [HarmonyPrefix]
         public static bool FileOpen_Prefix(string file_name, ref AFileBase __result)
         {
+            if (MaidLoader.quickMod != null)
+            {
+                if (MaidLoader.quickMod.qmFileSystem != null && MaidLoader.quickMod.qmFileSystem.IsExistentFile(file_name))
+                {
+                    __result = MaidLoader.quickMod.qmFileSystem.FileOpen(file_name);
+                    return false;
+                }
+            }
+
             if (GameUty.FileSystemMod != null && GameUty.FileSystemMod.IsExistentFile(file_name))
             {
                 __result =  GameUty.FileSystemMod.FileOpen(file_name);
@@ -44,30 +61,5 @@ namespace COM3D2.MaidLoader
             }
             return true;
         }
-
-        /*
-        /// <summary>
-        /// Again Mods Take priority but handled differently
-        /// </summary>
-        [HarmonyPatch(typeof(FileSystemArchive), nameof(FileSystemArchive.GetList))]
-        [HarmonyPostfix]
-        public static void GetFile_postfix(string f_str_path, AFileSystemBase.ListType type, ref string[] __result)
-        {
-            if GameUty.FileSystemMod != null)
-            {
-                //retrieve the list from FileSystemMod and remove duplicates
-                List<string> list = GameUty.FileSystemMod.GetList(f_str_path, type).Distinct().ToList();
-
-                foreach (string str in __result)
-                {
-                    if (!list.Contains(str))
-                    {
-                        list.Add(str);
-                    }
-                }
-                __result = list.ToArray();
-            }
-        }
-        */
     }
 }
