@@ -1,9 +1,11 @@
 ## Introduction
 
 Maid Loader is the BepinEx equivalent of Neerhom's [ModLoader](https://github.com/Neerhom/COM3D2.ModLoader)  
-While the latter still works and has proven its reliablility, Maid Loader adds some quality of life features for those who wish.
+While the latter still works and has proven its reliablility, Maid Loader adds some quality of life features for those who wish.  
+Transition from one to the other is seamless.  
+Part of ModLoader code was reused with Neerhom's authorisation.  
 
-### Mod Loader legacy
+### ModLoader legacy
 This is the list of features ModLoader already has and implemented in MaidLoader:
 - ModPriority: Allows for Mod to override game's items.
 - Asset Manager: Allows to override game's unity assets.
@@ -55,3 +57,8 @@ __*Relevant options:*__
 - *Custom Mod folder: QuickMod dedicated folder (if option above is disabled), you may enter a simple folder name in your game Maid folder or a complete path if you wish it to be anywhere else.*  
 - *Auto refresh: Enable the game to refresh new mods automatically a few seconds after the last files was added.*  
 - *Auto refresh delay: Delay before the game automatically refreshes new mods.*  
+
+### Auto .asset_bg
+.asset_bg files placed in PhotoBG_NEI will automatically be added to the game's background List, without the need of .nei.
+.asset_bg files placed in PhotoBG_OBJ_NEI will automatically be added to the game's props List, without the need of .nei.
+Deskitem currently still required a .nei in the same way ModLoader required them to be.
