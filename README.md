@@ -1,6 +1,6 @@
-##
+## Introduction
 
-Maid Loader is the BepinEx equivalent of Neerhom's ModLoader.
+Maid Loader is the BepinEx equivalent of Neerhom's [ModLoader](https://github.com/Neerhom/COM3D2.ModLoader)  
 While the latter still works and has proven its reliablility, Maid Loader adds some quality of life features for those who wish.
 
 ## Mod Loader legacy
