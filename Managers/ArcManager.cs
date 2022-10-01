@@ -21,20 +21,15 @@ namespace COM3D2.MaidLoader
         private static readonly string gamedataPath = Path.Combine(gamePath, "GameData");
         private static readonly string dummyArc = "MaidLoader";
 
+        //private static readonly bool loadArc = false;
         private static bool loadKS = MaidLoader.loadScripts.Value;
         private static bool loadSounds = MaidLoader.loadSounds.Value;
         private static bool useDedicatedSSFolder = MaidLoader.useDedicatedSSFolder.Value;
-        private static bool loadArc = false;
-        
-        private static List<string> files = new();
-        private static List<string> arcList = new();
 
+        private static List<string> arcList = new();
 
         internal ArcManager()
         {
-            //Look for any .arc in the mod folder
-            if (loadArc) { arcList = GetArc(); }
-
             //
             if (useDedicatedSSFolder & !Directory.Exists(modPath + "\\Scripts&Sounds"))
                 Directory.CreateDirectory(modPath + "\\Scripts&Sounds");
@@ -44,20 +39,19 @@ namespace COM3D2.MaidLoader
 
             logger.LogInfo("Looking for .ks/.ogg");
 
-            //Look for any .ks in the mod folder
-            if (loadKS)
-                files.AddRange(GetScripts());
+            string[] files;
 
-            //Look for any .ogg in the mod folder
-            if (loadSounds)
-                files.AddRange(GetSounds());
+            if (useDedicatedSSFolder)
+                files = Directory.GetFiles(Path.Combine(modPath, "Scripts&Sounds"), "*.*", SearchOption.AllDirectories).Where(f => f.ToLower().EndsWith(".ks") || f.ToLower().EndsWith(".ogg")).ToArray();
+            else
+                files = Directory.GetFiles(modPath, "*.*", SearchOption.AllDirectories).Where(f => f.ToLower().EndsWith(".ks") || f.ToLower().EndsWith(".ogg")).ToArray();
 
             sw.Stop();
-            logger.LogInfo($"Found {files.Count} file(s) in {sw.ElapsedMilliseconds}ms.");
+            logger.LogInfo($"Found {files.Length} file(s) in {sw.ElapsedMilliseconds}ms.");
 
 
             // No need load the dummy .arc if there's nothing to add.
-            if (files.Count > 0)
+            if (files.Length > 0)
             {
                 //Only Patch what's needed
                 if (!MaidLoader.SSL)
@@ -70,9 +64,8 @@ namespace COM3D2.MaidLoader
                 }
 
                 //Build the Dummy .arc
-                BuildArc();
+                BuildArc(files);
             }
-
         }
 
         /// <summary>
@@ -133,7 +126,7 @@ namespace COM3D2.MaidLoader
         /// <summary>
         /// Build a dummy .arc to store files into
         /// </summary>
-        private void BuildArc()
+        private void BuildArc(string[] files)
         {
             // Creating a new dummy .arc like ModLoader used to do.
             ArcFileSystem arc = new();
@@ -159,6 +152,7 @@ namespace COM3D2.MaidLoader
             }
         }
 
+        /*
         /// <summary>
         /// Returns all .ks found in the Mod folder
         /// </summary>
@@ -169,7 +163,7 @@ namespace COM3D2.MaidLoader
             if (useDedicatedSSFolder)
                 scripts = Directory.GetFiles(Path.Combine(gamePath, "Scripts&Sounds"), "*.ks", SearchOption.AllDirectories).ToList();                
             else
-                scripts = Directory.GetFiles(modPath, "*.ks", SearchOption.AllDirectories).ToList();            
+                scripts = Directory.GetFiles(modPath, "*.ks", SearchOption.AllDirectories).ToList();
 
             return scripts;
         }
@@ -205,6 +199,7 @@ namespace COM3D2.MaidLoader
 
             return result;
         }
+        */
 
         internal class Patchers
         {
