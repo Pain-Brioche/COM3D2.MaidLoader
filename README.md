@@ -47,6 +47,7 @@ COM3D2.ModMenuAccel.Patcher.dll
 This function monitors a folder so that any mod placed inside can be quickly added to the edit mode without any restart needed.  
 __*A few things to note:*__
 - This is NOT meant to replace the standard Mod folder.  
+- Mods in QuickMod behaves as standard mods do.
 - While the plugin is capable of doing it, adding hundreds of mods at a time is not recommended.
 - Mods in QuickMod have priority over standard Mod folder and game's files.
 - QuickMod is made for Edit mode, while it will work elsewhere once started, it needs edit mode to start.
@@ -59,6 +60,27 @@ __*Relevant options:*__
 - *Auto refresh delay: Delay before the game automatically refreshes new mods.*  
 
 ### Auto .asset_bg
-.asset_bg files placed in PhotoBG_NEI will automatically be added to the game's background List, without the need of .nei.
-.asset_bg files placed in PhotoBG_OBJ_NEI will automatically be added to the game's props List, without the need of .nei.
-Deskitem currently still required a .nei in the same way ModLoader required them to be.
+.asset_bg files placed in PhotoBG_NEI will automatically be added to the game's background List, without the need of .nei.  
+.asset_bg files placed in PhotoBG_OBJ_NEI will automatically be added to the game's props List, without the need of .nei.  
+Deskitem currently still required a .nei in the same way ModLoader required them to be.  
+
+### Faster Load
+In order to load .ks and .ogg into the game, ModLoader as well as MaidLoader need to create a dummy .arc. Where Maid Loader does things differently is by loading said .arc earlier in the game's Init. That way one of the game's slower process only happens once. Depending on your computer you may see a significant drop in this starting phase (95s down to 39s for me). This is also one reason .arc loading isn't possible from the Mod Folder. In addition you can skip this entirely if you do not have .ks and/or .ogg in your Mod folder, gaining a few more seconds for not searching in vain for inexistant files. Or as an option creating a dedicated folder to put your .ks and .ogg into if your Mod folder is very large.
+
+__*Relevant options:*__  
+- *Load scripts (.ks): Disable to ignore .ks or if you don't have any to gain a bit of speed*  
+- *Load sounds (.ogg): Disable to ignore .ogg or if you don't have any to gain a bit of speed*  
+- *Advanced option: Use a specific folder for Scripts and Sounds; creates a specific Mod/Scripts&Sounds to look into.*  
+
+### Mod Debug
+Advanced options bellow are reserved for game debugging should some mod cause issue and you can't/won't disable plugins.  
+__*Relevant options:*__  
+- *Enable Mod override: When Enabled (default) Mod and QuickMod will override game's assets.
+- *Enable Custom Mod override: When Enabled (default) use MaidLoader's custom Mod Override similar to ModLoader's. When Disabled, use the game's own Mod Priority System, less thorough but could proove safer in some cases.  
+
+
+## Notes
+- You can (and probably should) change options directly in BepinEx/config.
+- Consider than any change to the options need a game restart to take effect.
+- QuickMod plays quite a bit with how Mods are supposed to be loaded, in the limits of the game's worse offender: cm3d2.dll
+- I know it doesn't really load Maidos :(
