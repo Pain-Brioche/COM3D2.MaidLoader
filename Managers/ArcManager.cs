@@ -118,23 +118,16 @@ namespace COM3D2.MaidLoader
                     //Inject that bit of IL back
                     editedIL.InsertRange(i + 3, ILBlock);
 
-                    
+                    /*
                     for (int k = 0; k < editedIL.Count; k++)
                     {
                         logger.LogWarning($"New IL: {editedIL[k].opcode} {editedIL[k].operand}");
                     }
-                    
+                    */
 
                     return editedIL;
                 }
             }
-
-            /*
-            for (int i = 0; i < rawIL.Count; i++)
-            {
-                Main.logger.LogWarning(rawIL[i].opcode + " " + rawIL[i].operand);
-            }
-            */
             return rawIL;
         }
 
