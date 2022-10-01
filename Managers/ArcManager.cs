@@ -16,47 +16,45 @@ namespace COM3D2.MaidLoader
         private static ManualLogSource logger = MaidLoader.logger;
         private static Harmony harmony;
 
-        private static string gamePath = UTY.gameProjectPath;
-        private static string modPath = Path.Combine(gamePath, "Mod");
-        private static string gamedataPath = Path.Combine(gamePath, "GameData");
-        private static string dummyArc = "MaidLoader";
+        private static readonly string gamePath = UTY.gameProjectPath;
+        private static readonly string modPath = Path.Combine(gamePath, "Mod");
+        private static readonly string gamedataPath = Path.Combine(gamePath, "GameData");
+        private static readonly string dummyArc = "MaidLoader";
 
         private static bool loadKS = MaidLoader.loadScripts.Value;
         private static bool loadSounds = MaidLoader.loadSounds.Value;
         private static bool useDedicatedSSFolder = MaidLoader.useDedicatedSSFolder.Value;
         private static bool loadArc = false;
-
+        
         private static List<string> files = new();
         private static List<string> arcList = new();
 
 
-
-        internal static void Init()
+        internal ArcManager()
         {
             //Look for any .arc in the mod folder
             if (loadArc) { arcList = GetArc(); }
 
+            //
             if (useDedicatedSSFolder & !Directory.Exists(modPath + "\\Scripts&Sounds"))
                 Directory.CreateDirectory(modPath + "\\Scripts&Sounds");
 
-            if (loadKS || loadSounds)
-            {
-                Stopwatch sw = Stopwatch.StartNew();
-                sw.Start();
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Start();
 
-                logger.LogInfo("Looking for files to load");
+            logger.LogInfo("Looking for .ks/.ogg");
 
-                //Look for any .ks in the mod folder
-                if (loadKS)
-                    files.AddRange(GetScripts());
+            //Look for any .ks in the mod folder
+            if (loadKS)
+                files.AddRange(GetScripts());
 
-                //Look for any .ogg in the mod folder
-                if (loadSounds)
-                    files.AddRange(GetSounds());
+            //Look for any .ogg in the mod folder
+            if (loadSounds)
+                files.AddRange(GetSounds());
 
-                sw.Stop();
-                logger.LogInfo($"Found {files.Count} file(s) in {sw.ElapsedMilliseconds}ms.");
-            }
+            sw.Stop();
+            logger.LogInfo($"Found {files.Count} file(s) in {sw.ElapsedMilliseconds}ms.");
+
 
             // No need load the dummy .arc if there's nothing to add.
             if (files.Count > 0)
@@ -74,6 +72,7 @@ namespace COM3D2.MaidLoader
                 //Build the Dummy .arc
                 BuildArc();
             }
+
         }
 
         /// <summary>
@@ -83,7 +82,7 @@ namespace COM3D2.MaidLoader
         /// <param name="arcList">.arc found in the mod folder</param>
         /// <param name="addCustomArc">add a custom .arc for special files</param>
         /// <returns></returns>
-        internal static List<CodeInstruction> GetEdited(List<CodeInstruction> rawIL,string lastArc = "parts2", bool addCustomArc = true)
+        private static List<CodeInstruction> GetEdited(List<CodeInstruction> rawIL,string lastArc = "parts2", bool addCustomArc = true)
         {
             var ILBlock = new List<CodeInstruction>();
             var editedIL = new List<CodeInstruction>(rawIL);
@@ -134,7 +133,7 @@ namespace COM3D2.MaidLoader
         /// <summary>
         /// Build a dummy .arc to store files into
         /// </summary>
-        private static void BuildArc()
+        private void BuildArc()
         {
             // Creating a new dummy .arc like ModLoader used to do.
             ArcFileSystem arc = new();
@@ -163,7 +162,7 @@ namespace COM3D2.MaidLoader
         /// <summary>
         /// Returns all .ks found in the Mod folder
         /// </summary>
-        private static List<string> GetScripts()
+        private List<string> GetScripts()
         {
             List<string> scripts = new List<string>();
 
@@ -178,7 +177,7 @@ namespace COM3D2.MaidLoader
         /// <summary>
         /// Returns all .ogg found in the Mod folder
         /// </summary>
-        private static List<string> GetSounds()
+        private List<string> GetSounds()
         {
             List<string> sounds = new List<string>();
 
@@ -193,7 +192,7 @@ namespace COM3D2.MaidLoader
         /// <summary>
         /// Returns all .arc found in the Mod folder
         /// </summary>
-        private static List<string> GetArc()
+        private List<string> GetArc()
         {
             List<string> result = new();
 
@@ -206,50 +205,50 @@ namespace COM3D2.MaidLoader
 
             return result;
         }
-    }
 
-    internal class Patchers
-    {
-        // Add intructions to load the custom .arc alongside regular .arc
-        [HarmonyPatch(typeof(GameUty), nameof(GameUty.UpdateFileSystemPath))]
-        [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> UpdateFileSystemPath_Transpiler(IEnumerable<CodeInstruction> instructions)
+        internal class Patchers
         {
-            var codes = new List<CodeInstruction>(instructions);
+            // Add intructions to load the custom .arc alongside regular .arc
+            [HarmonyPatch(typeof(GameUty), nameof(GameUty.UpdateFileSystemPath))]
+            [HarmonyTranspiler]
+            public static IEnumerable<CodeInstruction> UpdateFileSystemPath_Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                var codes = new List<CodeInstruction>(instructions);
 
-            //Returns an edited block of IL code with additional .arc to load
-            codes = ArcManager.GetEdited(codes, "parts2");
+                //Returns an edited block of IL code with additional .arc to load
+                codes = GetEdited(codes, "parts2");
 
-            return codes;
+                return codes;
+            }
+
+            // Same thing for the English release
+            [HarmonyPatch(typeof(GameUty), nameof(GameUty.UpdateFileSystemPathToNewProduct))]
+            [HarmonyTranspiler]
+            public static IEnumerable<CodeInstruction> UpdateFileSystemPathToNewProduct_Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                var codes = new List<CodeInstruction>(instructions);
+
+                //Returns an edited block of IL code with additional .arc to load
+                codes = GetEdited(codes, "parts-en2");
+
+                return codes;
+            }
         }
 
-        // Same thing for the English release
-        [HarmonyPatch(typeof(GameUty), nameof(GameUty.UpdateFileSystemPathToNewProduct))]
-        [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> UpdateFileSystemPathToNewProduct_Transpiler(IEnumerable<CodeInstruction> instructions)
+        internal class SSLPatcher
         {
-            var codes = new List<CodeInstruction>(instructions);
+            // Still the same thing for ShortStartLoader this time
+            [HarmonyPatch(typeof(MainBigRedo), nameof(MainBigRedo.UpdateFileSystemPath))]
+            [HarmonyTranspiler]
+            public static IEnumerable<CodeInstruction> UpdateFileSystemPathSSL_Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                var codes = new List<CodeInstruction>(instructions);
 
-            //Returns an edited block of IL code with additional .arc to load
-            codes = ArcManager.GetEdited(codes, "parts-en2");
+                //Returns an edited block of IL code with additional .arc to load
+                codes = GetEdited(codes, "parts2");
 
-            return codes;
-        }
-    }
-
-    internal class SSLPatcher
-    {
-        // Still the same thing for ShortStartLoader this time
-        [HarmonyPatch(typeof(MainBigRedo), nameof(MainBigRedo.UpdateFileSystemPath))]
-        [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> UpdateFileSystemPathSSL_Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            var codes = new List<CodeInstruction>(instructions);
-
-            //Returns an edited block of IL code with additional .arc to load
-            codes = ArcManager.GetEdited(codes, "parts2");
-
-            return codes;
+                return codes;
+            }
         }
     }
 }

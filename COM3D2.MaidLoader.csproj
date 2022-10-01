@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>
@@ -32,16 +32,16 @@
       <HintPath>..\COM3D2 Lib\CM3D2.Toolkit.Guest4168Branch.dll</HintPath>
     </Reference>
     <Reference Include="COM3D2.API">
-      <HintPath>Libs\COM3D2.API.dll</HintPath>
+      <HintPath>..\COM3D2 Lib\COM3D2.API.dll</HintPath>
     </Reference>
     <Reference Include="COM3D2.CornerMessage">
-      <HintPath>Libs\COM3D2.CornerMessage.dll</HintPath>
+      <HintPath>..\COM3D2 Lib\COM3D2.CornerMessage.dll</HintPath>
     </Reference>
     <Reference Include="COM3D2.ShortStartLoader">
-      <HintPath>Libs\COM3D2.ShortStartLoader-Publicized.dll</HintPath>
+      <HintPath>..\COM3D2 Lib\COM3D2.ShortStartLoader-Publicized.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading">
-      <HintPath>Libs\System.Threading.dll</HintPath>
+      <HintPath>..\COM3D2 Lib\System.Threading.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

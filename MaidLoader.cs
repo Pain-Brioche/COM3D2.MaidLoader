@@ -2,7 +2,6 @@
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using COM3D2API;
-using System.Drawing;
 using System;
 using UnityEngine.SceneManagement;
 
@@ -19,6 +18,7 @@ namespace COM3D2.MaidLoader
         internal static ManualLogSource logger;
         internal static MaidLoader instance;
         public static QuickMod quickMod;
+        internal static ArcManager arcManager;
 
         internal static bool SSL;
 
@@ -81,7 +81,9 @@ namespace COM3D2.MaidLoader
 
             //Only load dummy .arc when needed
             if (loadScripts.Value || loadSounds.Value)
-                ArcManager.Init();         
+            {
+                arcManager = new();
+            }    
 
             if (useModOverride.Value)
             {
@@ -104,9 +106,6 @@ namespace COM3D2.MaidLoader
 
             //Load some custom .nei
             NeiManager.Init();
-
-            //An attempt at loading .ogg directly from the mod folder, while it works, this approch is heavier than the dummy .arc and more likely to break.
-            //SoundManager.Init();
         }
 
         private static void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
