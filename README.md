@@ -75,8 +75,8 @@ __*Relevant options:*__
 ### Mod Debug
 Advanced options bellow are reserved for game debugging should some mod cause issue and you can't/won't disable plugins.  
 __*Relevant options:*__  
-- *Enable Mod override: When Enabled (default) Mod and QuickMod will override game's assets.
-- *Enable Custom Mod override: When Enabled (default) use MaidLoader's custom Mod Override similar to ModLoader's. When Disabled, use the game's own Mod Priority System, less thorough but could proove safer in some cases.  
+- *Enable Mod override: When Enabled (default) Mod and QuickMod will override game's assets.*
+- *Enable Custom Mod override: When Enabled (default) use MaidLoader's custom Mod Override similar to ModLoader's. When Disabled, use the game's own Mod Priority System, less thorough but could proove safer in some cases.*  
 
 
 ## Notes
