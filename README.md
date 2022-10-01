@@ -12,6 +12,7 @@ This is the list of features ModLoader already has and implemented in MaidLoader
 - Scripts: Load .ks (script files) to the game.
 - Sounds: Load .ogg (sound files) to the game.
 - .Pmat: Load modded .pmat, and check for redundancies.
+- SML, SMVD, SSL support.
 
 ### New  
 These features are esclusive to MaidLoader they are described in more details later:
@@ -38,3 +39,19 @@ COM3D2.ModMenuAccel.Hook.dll
 COM3D2.ModMenuAccel.Patcher.dll
 ```
 - Optional: Edit config in the F1 menu (in game).
+
+## New features descriptions
+### QuickMod
+This function monitors a folder so that any mod placed inside can be quickly added to the edit mode without any restart needed.  
+__*A few things to note:*__
+- This is NOT meant to replace the standard Mod folder.  
+- While the plugin is capable of doing it, adding hundreds of mods at a time is not recommended.
+- Mods in QuickMod have priority over standard Mod folder and game's files.
+- QuickMod is made for Edit mode, while it will work elsewhere once started, it needs edit mode to start.
+
+__*Relevant options:*__  
+- *Use QuickMod: Disable if you don't want to use it.*  
+- *Use standard Mod folder: If enabled the standard Mod folder will be monitored for QuickMod, performances heavily depends on your Mod folder size and disk drive.*  
+- *Custom Mod folder: QuickMod dedicated folder (if option above is disabled), you may enter a simple folder name in your game Maid folder or a complete path if you wish it to be anywhere else.*  
+- *Auto refresh: Enable the game to refresh new mods automatically a few seconds after the last files was added.*  
+- *Auto refresh delay: Delay before the game automatically refreshes new mods.*  
