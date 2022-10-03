@@ -38,7 +38,7 @@ COM3D2.ModLoader.Patcher.dll
 COM3D2.ModMenuAccel.Hook.dll
 COM3D2.ModMenuAccel.Patcher.dll
 ```
-- Make sure you have [CM3D2.Toolkit.Guest4168Branch.dll](https://github.com/JustAGuest4168/CM3D2.Toolkit/releases) and System.Threading.dll
+- Make sure you have [CM3D2.Toolkit.Guest4168Branch.dll](https://github.com/JustAGuest4168/CM3D2.Toolkit/releases), [COM3D2.API](https://github.com/DeathWeasel1337/COM3D2_Plugins/releases/tag/v3) and System.Threading.dll
 - Optional: Edit config in the F1 menu (in game).
 
 ## New features descriptions
