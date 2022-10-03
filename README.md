@@ -15,6 +15,7 @@ This is the list of features ModLoader already has and implemented in MaidLoader
 - Sounds: Load .ogg (sound files) to the game.
 - .Pmat: Load modded .pmat, and check for redundancies.
 - SML, SMVD, SSL support.
+- Loading .arc from the Mod folder (Should be avoided whenever possible though).
 
 ### New  
 These features are esclusive to MaidLoader they are described in more details later:
@@ -24,10 +25,7 @@ These features are esclusive to MaidLoader they are described in more details la
 - Mod debugging options.
 
 ### Not Implemented
-What MaidLoader cannot currently do ModLoader can:
-- Load .arc from the Mod folder; doing this is a terrible idea anyway and should be avoided at all time.  
-The only reason to do so was removed with the ablity to load .ogg.
-- ModMenuAccell support: This is in progress.
+- ModMenuAccell support: This plugin has lost its purpose over the game's updates.
 
 
 ## Installation
@@ -40,6 +38,7 @@ COM3D2.ModLoader.Patcher.dll
 COM3D2.ModMenuAccel.Hook.dll
 COM3D2.ModMenuAccel.Patcher.dll
 ```
+- Make sure you have [CM3D2.Toolkit.Guest4168Branch.dll](https://github.com/JustAGuest4168/CM3D2.Toolkit/releases) and System.Threading.dll
 - Optional: Edit config in the F1 menu (in game).
 
 ## New features descriptions
