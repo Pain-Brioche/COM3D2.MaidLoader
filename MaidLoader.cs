@@ -25,6 +25,7 @@ namespace COM3D2.MaidLoader
         //Startup options
         internal static ConfigEntry<bool> loadScripts;
         internal static ConfigEntry<bool> loadSounds;
+        internal static ConfigEntry<bool> loadArc;
         internal static ConfigEntry<bool> useModOverride;
         internal static ConfigEntry<bool> useCustomModOverride;
         internal static ConfigEntry<bool> useDedicatedSSFolder;
@@ -48,14 +49,14 @@ namespace COM3D2.MaidLoader
             //Startup options
             loadScripts = Config.Bind("General", "Load scripts (.ks)", true, "Whether or not .ks from the Mod folder will be loaded, disabling this can improve loading time.");
             loadSounds = Config.Bind("General", "Load sounds (.ogg)", true, "Whether or not .ogg from the Mod folder will be loaded, disabling this can improve loading time.");
-
+            loadArc = Config.Bind("General", "Load Arc (.arc)", false, "Whether or not .arc from the Mod folder will be loaded, to avoid whenever possible.");
 
             //QuickMod options
             useQuickMod = Config.Bind("QuickMod", "1. Use QuickMod", true, "Use the Dynamic Mod Loading system");
             useModFolder = Config.Bind("QuickMod", "2. Use standard Mod folder", false, "Disable to use a dedicated QuickMod folder (A dedicated folder is faster");
             quickModPath = Config.Bind("QuickMod", "3. Custom Mod folder", "Mod_QuickMod" , "Dedicated QuickMod folder to monitor");
             quickModAutoRefresh = Config.Bind("QuickMod", "4. Auto refresh", false, "If enabled mods will be automatically refresh x seconds after the last file is added.");
-            quickModTimer = Config.Bind("QuickMod Advanced", "Auto refresh delay", 5, new ConfigDescription("How many seconds to wait after last file was added before updating the FileSystem, setting this too low may result in incomplte refresh or ignored files", new AcceptableValueRange<int>(1, 60), "Advanced"));
+            quickModTimer = Config.Bind("QuickMod", "5. Auto refresh delay", 5, new ConfigDescription("How many seconds to wait after last file was added before updating the FileSystem, setting this too low may result in incomplte refresh or ignored files", new AcceptableValueRange<int>(1, 60), "Advanced"));
 
             //Advanced
             useModOverride = Config.Bind("Advanced", "Enable Mod override", true, new ConfigDescription("Whether or not mods can replace game's assets, DEBUG ONLY!", null, "Advanced"));
@@ -80,7 +81,7 @@ namespace COM3D2.MaidLoader
             }, "Refresh new mods", Convert.FromBase64String(icon));
 
             //Only load dummy .arc when needed
-            if (loadScripts.Value || loadSounds.Value)
+            if (loadScripts.Value || loadSounds.Value || loadArc.Value)
             {
                 arcManager = new();
             }    
