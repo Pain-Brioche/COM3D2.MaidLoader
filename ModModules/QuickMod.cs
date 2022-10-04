@@ -36,7 +36,7 @@ namespace COM3D2.MaidLoader
         private static Harmony harmony;
         //private static Harmony harmony2;
 
-        public FileSystemWindows qmFileSystem = new();
+        public QuickModFileSystem qmFileSystem = new();
 
 
         internal QuickMod()
@@ -229,7 +229,7 @@ namespace COM3D2.MaidLoader
         private void UpdateFileSystem()
         {   
             logger.LogInfo("Updating QM File System");
-            FileSystemWindows newFS = new();
+            QuickModFileSystem newFS = new();
 
             newFS.SetBaseDirectory(quickModFolderPath);
 
@@ -246,7 +246,7 @@ namespace COM3D2.MaidLoader
             }
 
             // keep the old FS to delete later
-            FileSystemWindows oldFS = qmFileSystem;
+            QuickModFileSystem oldFS = qmFileSystem;
             qmFileSystem = newFS;
 
             // delete the old FS
@@ -342,26 +342,5 @@ namespace COM3D2.MaidLoader
                 MaidLoader.quickMod.Start();
             }
         }
-
-        /*
-        internal class FileSystemModPatch
-        {
-            // Patch GameUty.FileOpen to also look inside QuickMod FileSystem.
-            [HarmonyPatch(typeof(GameUty), nameof(GameUty.FileOpen))]
-            [HarmonyPostfix]
-            internal static void FileOpen_Postfix(string fileName, ref AFileBase __result)
-            {
-                if (__result == null)
-                {
-                    bool exists = qmFileSystem.IsExistentFile(fileName);
-
-                    if (!exists)
-                        MaidLoader.logger.LogMessage($"{fileName} doesn't exist");
-                    else
-                        __result = qmFileSystem.FileOpen(fileName);
-                }
-            }
-        }
-        */
     }
 }
