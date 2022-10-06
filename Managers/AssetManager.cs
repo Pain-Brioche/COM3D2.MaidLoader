@@ -23,10 +23,11 @@ namespace COM3D2.MaidLoader
         public static void InitPostfix()
         {
             //Retrieve any .asset_bg the game found in the Mod folder
-            string[] array = GameUty.FileSystemMod.GetFileListAtExtension(".asset_bg"); ;
+            string[] array = GameUty.FileSystemMod.GetFileListAtExtension(".asset_bg");
             for (int i = 0; i < array.Length; i++)
             {
                 string fileName = Path.GetFileName(array[i]);
+                logger.LogDebug($"Adding asset: {fileName}");
 
                 //Overrides or adds .asset_bg to the background dictionary
                 GameUty.BgFiles[fileName] = GameUty.FileSystemMod;

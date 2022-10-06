@@ -200,10 +200,14 @@ namespace COM3D2.MaidLoader
         // Append Object categories and details by reading modded .nei
         internal static void AppendDeskData()
         {
-            string[] DeskItemList = null;
-            DeskItemList = GameUty.FileSystemMod.GetList("DeskItem_NEI", AFileSystemBase.ListType.AllFile);
+            string[] DeskItemList = GameUty.FileSystemMod.GetList("DeskItem_NEI", AFileSystemBase.ListType.AllFile);
 
-            if (DeskItemList == null || DeskItemList.Length == 0) { return; }
+            if (DeskItemList == null || DeskItemList.Length == 0)
+            {
+                logger.LogDebug("DeskItemList returned null or empty");
+                return; 
+            }
+
 
             foreach (string str in DeskItemList)
             {
@@ -238,7 +242,7 @@ namespace COM3D2.MaidLoader
                                     if (DeskManager.item_category_data_dic.ContainsKey(id))
                                         logger.LogWarning($"Category ID [{id}] already exists");
                                     else
-                                        DeskManager.item_category_data_dic.Add(id, categoryName);
+                                        DeskManager.item_category_data_dic.Add(id, categoryName);                                    
                                 }
                             }
                         }
