@@ -209,6 +209,8 @@ namespace COM3D2.MaidLoader
             
             if (update.IsFaulted)
             {
+                logger.LogError(update.Exception.InnerException);
+
                 logger.LogError($"QuickMod encountered an error, Refresh was canceled. One of your last added mod could be faulty or couldn't be read.");
                 yield break;
             }
@@ -236,14 +238,17 @@ namespace COM3D2.MaidLoader
             foreach (string str in updatedPath)
                 newFS.AddFolder(str);
 
+            //newFS.AddAutoPathForAllFolder(true);
+            
             string[] folders = newFS.GetList(string.Empty, AFileSystemBase.ListType.AllFolder);
+                        
             foreach (string folder in folders)
             {
                 if (newFS.AddAutoPath(folder))
                 {
                     //logger.LogInfo($"Folder added: {folder}");
                 }
-            }
+            }            
 
             // keep the old FS to delete later
             QuickModFileSystem oldFS = qmFileSystem;
@@ -259,7 +264,7 @@ namespace COM3D2.MaidLoader
         private void InitMenu()
         {
             // Get all .menu from QuickMod FileSystem
-            List<string> files = qmFileSystem.GetFileListAtExtension("menu").ToList();
+            List<string> files = qmFileSystem.GetFileListAtExtension(".menu").ToList();
 
             if (files.Count == 0 || files == null)
                 return;
