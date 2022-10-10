@@ -7,6 +7,9 @@ using System.Text;
 
 namespace COM3D2.MaidLoader
 {    
+    //Everything here is experimental and not used in released versions of MaidLoader
+
+
     public class ExperimentalFileSystem : AFileSystemBase
     {
         public List<ModItemFile> ItemFileDatabase { get; set; } = new List<ModItemFile>();

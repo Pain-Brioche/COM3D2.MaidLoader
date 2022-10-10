@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MaidLoader
 {
-    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.0.1")]
+    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.1.1")]
     [BepInDependency("ShortStartLoader", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("COM3D2.CornerMessage", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("deathweasel.com3d2.api", BepInDependency.DependencyFlags.HardDependency)]
@@ -18,6 +18,7 @@ namespace COM3D2.MaidLoader
         internal static ManualLogSource logger;
         internal static MaidLoader instance;
         public static QuickMod quickMod;
+        internal static RefreshMod refreshMod;
         internal static ArcManager arcManager;
 
         internal static bool SSL;
@@ -78,7 +79,14 @@ namespace COM3D2.MaidLoader
                 if (quickMod != null)
                     MaidLoader.instance.StartCoroutine(quickMod.Refresh());
 
-            }, "Refresh new mods", Convert.FromBase64String(icon));
+            }, "Refresh QuickMod", Convert.FromBase64String(icon));
+
+            SystemShortcutAPI.AddButton("RefreshMod", () =>
+            {
+                    MaidLoader.instance.StartCoroutine(refreshMod.RefreshCo());
+
+            }, "Refresh Mod Folder", Convert.FromBase64String(icon));
+
 
             //Only load dummy .arc when needed
             if (loadScripts.Value || loadSounds.Value || loadArc.Value)
@@ -114,6 +122,7 @@ namespace COM3D2.MaidLoader
             if (scene.buildIndex == 5 && useQuickMod.Value)
             {
                 quickMod = new QuickMod();
+                refreshMod = new RefreshMod();
             }
         }
 
