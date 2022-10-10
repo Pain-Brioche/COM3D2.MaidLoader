@@ -49,7 +49,12 @@ namespace COM3D2.MaidLoader
 
                 string searchPath = useDedicatedSSFolder ? Path.Combine(modPath, "Scripts&Sounds") : modPath;
 
-                files = Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories).Where(f => f.ToLower().EndsWith(".ks") || f.ToLower().EndsWith(".ogg")).ToArray();
+                if (loadKS && !loadSounds)
+                    files = Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories).Where(f => f.ToLower().EndsWith(".ks")).ToArray();
+                else if (!loadKS && loadSounds)
+                    files = Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories).Where(f => f.ToLower().EndsWith(".ogg")).ToArray();
+                else
+                    files = Directory.GetFiles(searchPath, "*.*", SearchOption.AllDirectories).Where(f => f.ToLower().EndsWith(".ks") || f.ToLower().EndsWith(".ogg")).ToArray();
 
                 sw.Stop();
                 logger.LogInfo($"Found {files.Length} file(s) in {sw.ElapsedMilliseconds}ms.");
