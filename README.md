@@ -45,7 +45,7 @@ COM3D2.ModMenuAccel.Patcher.dll
 
 ## New features descriptions
 ### ModRefresh
-This function adds a button in your gear menu to refresh the entire Mod folder, and adds any new mods to your game while it's running. 
+This function adds a button in your gear menu to refresh the entire Mod folder, and adds any new mods to your game while it's running.  
 __*A few things to note:*__
 - Everything is done in the background so it will not freeze the game while refreshing.
 - If in edit mode, the UI will blink once when new icons are added.
