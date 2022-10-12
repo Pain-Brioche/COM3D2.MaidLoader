@@ -19,7 +19,8 @@ This is the list of features ModLoader already has and implemented in MaidLoader
 
 ### New  
 These features are esclusive to MaidLoader they are described in more details later:
-- QuickMod: Add mods without restarting the game or leaving the edit mode.
+- RefreshMod:  Add mods without restarting the game or leaving the edit mode.
+- QuickMod: Same thing as RefreshMod, with a dedicated folder and faster if your Mod folder is large.
 - Auto .asset_bg: Add backgrounds and props to the game without .nei required.
 - Faster Load: Reduces the game startup times.
 - Mod debugging options.
@@ -35,23 +36,30 @@ These features are esclusive to MaidLoader they are described in more details la
 ```
 COM3D2.ModLoader.Managed.dll
 COM3D2.ModLoader.Patcher.dll
+COM3D2.ModMenuAccel.Hook.dll
+COM3D2.ModMenuAccel.Patcher.dll
 ```
 - Make sure you have [CM3D2.Toolkit.Guest4168Branch.dll](https://github.com/JustAGuest4168/CM3D2.Toolkit/releases), [COM3D2.API](https://github.com/DeathWeasel1337/COM3D2_Plugins/releases/tag/v3) and System.Threading.dll
 - Optional: Edit config in the F1 menu (in game).
+- An improved ModMenuAccel is on the work, MaidLoader is already compatible with it when it'll be released.
 
 ## New features descriptions
+### ModRefresh
+This function adds a button in your gear menu to refresh the entire Mod folder, and adds any new mods to your game while it's running. 
+__*A few things to note:*__
+- Everything is done in the background so it will not freeze the game while refreshing.
+- If in edit mode, the UI will blink once when new icons are added.
+
 ### QuickMod
-This function monitors a folder so that any mod placed inside can be quickly added to the edit mode without any restart needed.  
+This function monitors a folder so that any mod placed inside can be quickly added to the game without any restart needed.  
 __*A few things to note:*__
 - This is NOT meant to replace the standard Mod folder.  
 - Mods in QuickMod behaves as standard mods do.
 - While the plugin is capable of doing it, adding hundreds of mods at a time is not recommended.
 - Mods in QuickMod have priority over standard Mod folder and game's files.
-- QuickMod is made for Edit mode, while it will work elsewhere once started, it needs edit mode to start.
 
 __*Relevant options:*__  
-- *Use QuickMod: Disable if you don't want to use it.*  
-- *Use standard Mod folder: If enabled the standard Mod folder will be monitored for QuickMod, performances heavily depends on your Mod folder size and disk drive.*  
+- *Use QuickMod: Disable if you don't want to use it.*   
 - *Custom Mod folder: QuickMod dedicated folder (if option above is disabled), you may enter a simple folder name in your game Maid folder or a complete path if you wish it to be anywhere else.*  
 - *Auto refresh: Enable the game to refresh new mods automatically a few seconds after the last files was added.*  
 - *Auto refresh delay: Delay before the game automatically refreshes new mods.*  
@@ -66,7 +74,8 @@ In order to load .ks and .ogg into the game, ModLoader as well as MaidLoader nee
 
 __*Relevant options:*__  
 - *Load scripts (.ks): Disable to ignore .ks or if you don't have any to gain a bit of speed*  
-- *Load sounds (.ogg): Disable to ignore .ogg or if you don't have any to gain a bit of speed*  
+- *Load sounds (.ogg): Disable to ignore .ogg or if you don't have any to gain a bit of speed*
+- *Load Arcs (.arc): Disable to ignore .arc or if you don't have any to gain a bit of speed*
 - *Advanced option: Use a specific folder for Scripts and Sounds; creates a specific Mod/Scripts&Sounds to look into.*  
 
 ### Mod Debug
@@ -78,6 +87,5 @@ __*Relevant options:*__
 
 ## Notes
 - You can (and probably should) change options directly in BepinEx/config.
-- Consider than any change to the options need a game restart to take effect.
-- QuickMod plays quite a bit with how Mods are supposed to be loaded, in the limits of the game's worse offender: cm3d2.dll
+- Consider that any change to the options need a game restart to take effect.
 - I know it doesn't really load Maidos :(
