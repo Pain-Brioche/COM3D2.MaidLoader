@@ -18,7 +18,7 @@ This is the list of features ModLoader already has and implemented in MaidLoader
 - Loading .arc from the Mod folder (Should be avoided whenever possible though).
 
 ### New  
-These features are esclusive to MaidLoader they are described in more details later:
+These features are exclusive to MaidLoader they are described in more details later:
 - RefreshMod:  Add mods without restarting the game or leaving the edit mode.
 - QuickMod: Same thing as RefreshMod, with a dedicated folder and faster if your Mod folder is large.
 - Auto .asset_bg: Add backgrounds and props to the game without .nei required.
