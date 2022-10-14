@@ -1,3 +1,5 @@
+![MaidLoader](MaidLoaderLogo.png)
+
 ## Introduction
 
 Maid Loader is the BepinEx equivalent of Neerhom's [ModLoader](https://github.com/Neerhom/COM3D2.ModLoader)  
