@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,7 +7,6 @@ using HarmonyLib;
 using UnityEngine;
 using BepInEx.Logging;
 using System.Threading.Tasks;
-using BepInEx;
 using UnityEngine.SceneManagement;
 
 namespace COM3D2.MaidLoader
@@ -59,11 +57,6 @@ namespace COM3D2.MaidLoader
 
             //Gather items already in QuickMod's folder if standard mod load isn't used.
             MaidLoader.instance.StartCoroutine(RefreshCo());
-        }
-
-        private void Start()
-        {
-                   
         }
 
         /// <summary>

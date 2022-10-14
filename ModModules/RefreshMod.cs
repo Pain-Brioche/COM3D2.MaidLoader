@@ -19,11 +19,6 @@ namespace COM3D2.MaidLoader
         private List<string> menuList = GameUty.FileSystemMod.GetFileListAtExtension(".menu").ToList();
         private List<string> newMenus = new();
 
-        internal RefreshMod()
-        {
-            //Harmony.CreateAndPatchAll(typeof(InitPatch));
-        }
-
 
         /// <summary>
         /// Refresh the File system and edit menus as a Coroutine.
@@ -52,7 +47,6 @@ namespace COM3D2.MaidLoader
             Task getNewMenus = Task.Factory.StartNew(() =>
             {
                 newMenus.AddRange(GameUty.FileSystemMod.GetFileListAtExtension(".menu").Except(menuList));
-                //newMenus = Directory.GetFiles(modPath, "*", SearchOption.AllDirectories).Where(f => Path.GetExtension(f).ToLower() == ".menu").Select(x => x.Replace(modPath + "\\", string.Empty).ToLower()).Except(menus).ToArray();
             });
             yield return new WaitUntil(() => getNewMenus.IsCompleted == true);
 
@@ -162,7 +156,7 @@ namespace COM3D2.MaidLoader
 
         internal class InitPatch
         {
-            // Wait for the edit mode to finish loading entirely before doing anything, this is done so QL doesn't interfere with normal load times.
+            // Adding .menu to the UI
             [HarmonyPatch(typeof(SceneEdit), nameof(SceneEdit.OnCompleteFadeIn))]
             [HarmonyPostfix]
             internal static void OnCompleteFadeIn_Postfix()

@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MaidLoader
 {
-    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.1.2")]
+    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.1.3")]
     [BepInDependency("ShortStartLoader", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("COM3D2.CornerMessage", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("deathweasel.com3d2.api", BepInDependency.DependencyFlags.HardDependency)]
@@ -52,9 +52,9 @@ namespace COM3D2.MaidLoader
             loadArc = Config.Bind("General", "Load Arc (.arc)", false, "Whether or not .arc from the Mod folder will be loaded, to avoid whenever possible.");
 
             //QuickMod options
-            useQuickMod = Config.Bind("QuickMod", "1. Use QuickMod", true, "Use the Dynamic Mod Loading system");
+            useQuickMod = Config.Bind("QuickMod", "1. Use QuickMod", false, "Use the Dynamic Mod Loading system");
             quickModPath = Config.Bind("QuickMod", "3. Custom Mod folder", "Mod_QuickMod" , "Dedicated QuickMod folder to monitor");
-            quickModAutoRefresh = Config.Bind("QuickMod", "4. Auto refresh", false, "If enabled mods will be automatically refresh x seconds after the last file is added.");
+            quickModAutoRefresh = Config.Bind("QuickMod", "4. Auto refresh", true, "If enabled mods will be automatically refresh x seconds after the last file is added.");
             quickModTimer = Config.Bind("QuickMod", "5. Auto refresh delay", 5, new ConfigDescription("How many seconds to wait after last file was added before updating the FileSystem, setting this too low may result in incomplte refresh or ignored files", new AcceptableValueRange<int>(1, 60), "Advanced"));
 
             //Advanced
@@ -120,7 +120,7 @@ namespace COM3D2.MaidLoader
 
         private static void OnSceneLoaded(Scene scene, LoadSceneMode sceneMode)
         {
-            if (scene.buildIndex == 9)
+            if (scene.name == "SceneTitle")
             {
                 if(refreshMod == null)
                     refreshMod = new RefreshMod();
