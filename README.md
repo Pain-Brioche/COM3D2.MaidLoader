@@ -30,6 +30,9 @@ These features are exclusive to MaidLoader they are described in more details la
 ### Not Implemented
 - Nothing
 
+### Known Issues
+- Possible issue with ShortMenuVanillaDatabase
+
 
 ## Installation
 - Download the latest MaidLoader .dll.
