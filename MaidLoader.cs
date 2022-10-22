@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MaidLoader
 {
-    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.1.3")]
+    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.2.0")]
     [BepInDependency("ShortStartLoader", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("COM3D2.CornerMessage", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("deathweasel.com3d2.api", BepInDependency.DependencyFlags.HardDependency)]
@@ -17,9 +17,9 @@ namespace COM3D2.MaidLoader
     {
         internal static ManualLogSource logger;
         internal static MaidLoader instance;
+        internal static ArcManager arcManager;
         public static QuickMod quickMod;
         public static RefreshMod refreshMod;
-        internal static ArcManager arcManager;
 
         internal static bool SSL;
 

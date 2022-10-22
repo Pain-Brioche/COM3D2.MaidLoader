@@ -8,16 +8,18 @@ using System.Threading.Tasks;
 using System.IO;
 using UnityEngine.SceneManagement;
 using HarmonyLib;
+using System;
 
 namespace COM3D2.MaidLoader
 {
     public class RefreshMod
     {
         private ManualLogSource logger = MaidLoader.logger;
+        public static event EventHandler<RefreshEventArgs> Refreshed;
 
         string gamePath = UTY.gameProjectPath + "\\";
-        private List<string> menuList = GameUty.FileSystemMod.GetFileListAtExtension(".menu").ToList();
-        private List<string> newMenus = new();
+        //private List<string> menuList = GameUty.FileSystemMod.GetFileListAtExtension(".menu").ToList();
+        private List<string> addedMenus = new();
 
 
         /// <summary>
@@ -27,6 +29,9 @@ namespace COM3D2.MaidLoader
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
+
+            //recover existing .menu from the old FileSystem
+            string[] oldFSMenus = GameUty.FileSystemMod.GetFileListAtExtension(".menu");
 
             // Create a thread and wait for UpdateFileSystem to be done.
             Task update = Task.Factory.StartNew(() =>
@@ -43,25 +48,38 @@ namespace COM3D2.MaidLoader
                 yield break;
             }
 
-            //Get new .menu files
-            Task getNewMenus = Task.Factory.StartNew(() =>
-            {
-                newMenus.AddRange(GameUty.FileSystemMod.GetFileListAtExtension(".menu").Except(menuList));
-            });
-            yield return new WaitUntil(() => getNewMenus.IsCompleted == true);
+            //recover new .menu from the new FileSystem
+            string[] newFSMenus = GameUty.FileSystemMod.GetFileListAtExtension(".menu");
 
-            //Parse added .menu
-            if (newMenus != null && newMenus.Count != 0)
-            {
-                if(SceneManager.GetActiveScene().buildIndex == 5)
-                    InitMenu(newMenus);
-                else
-                    logger.LogInfo("Edit mode not started. Integration of new .menu to the UI postponed.");
+            //Get added .menu files, keep them aside in case edit mode isn't loaded.
+            addedMenus.AddRange(newFSMenus.Except(oldFSMenus));
 
-                menuList.AddRange(newMenus);
-                newMenus.Clear();
+            //Get deleted .menu files
+            string[] deletedMenus = oldFSMenus.Except(newFSMenus).ToArray();
+
+            //Raise Refresh Event
+            Refreshed?.Invoke(this, new RefreshEventArgs(addedMenus.ToArray(), deletedMenus));
+
+            // Remove deleted .menu from the game's UI, only if edit mode is enabled
+            if (deletedMenus != null && deletedMenus.Length != 0 && SceneManager.GetActiveScene().buildIndex == 5)
+            {
+                DeleteMenuIcon(deletedMenus.Select(m => Path.GetFileName(m)).ToArray());
             }
 
+            //Add eventual .menu to the game's UI, only is edit mode is enabled.
+            if (addedMenus != null && addedMenus.Count != 0)
+            {
+                if(SceneManager.GetActiveScene().buildIndex == 5)
+                {
+                    AddMenuIcon(addedMenus);
+                    addedMenus.Clear();
+                }
+                else
+                {
+                    logger.LogInfo("Edit mode not started. Integration of new .menu to the UI postponed.");
+                } 
+            }
+            
             sw.Stop();
 
             CornerMessage.DisplayMessage("Refresh over, new files added.", 6);
@@ -91,10 +109,7 @@ namespace COM3D2.MaidLoader
             oldFS.Dispose();
         }
 
-        /// <summary>
-        /// Do everything needed to add a .menu to the edit mode panels.
-        /// </summary>
-        private void InitMenu(List<string> menus)
+        private void AddMenuIcon(List<string> menus)
         {
             logger.LogInfo($"Adding {menus.Count} menus. This might freeze the game for a short time.");
 
@@ -154,6 +169,42 @@ namespace COM3D2.MaidLoader
             sceneEdit.StartCoroutine(sceneEdit.CoLoadWait());
         }
 
+        private void DeleteMenuIcon(string[] deletedMenus)
+        {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            SceneEdit sceneEdit = GameObject.Find("__SceneEdit__").GetComponent<SceneEdit>();
+
+            foreach (SceneEdit.SCategory category in sceneEdit.m_listCategory)
+            {
+                foreach(SceneEdit.SPartsType part in category.m_listPartsType)
+                {
+                    for(int i = part.m_listMenu.Count - 1; i >=0; i--)
+                    {
+                        if (deletedMenus.Contains(part.m_listMenu[i].m_strMenuFileName))
+                        {
+                            SceneEdit.SMenuItem mi = part.m_listMenu[i];
+
+                            logger.LogInfo($"\tRemoving: {mi.m_strMenuFileName}");
+
+                            //Remove the SMenuItem from lists referencing it.
+                            part.m_listMenu.Remove(mi);
+                            sceneEdit.m_menuRidDic.Remove(mi.m_nMenuFileRID);
+
+                            //Destroy relevant parts from the SMenuItem to make it disapear from the UI.
+                            UnityEngine.Object.Destroy(mi.m_goButton);
+                            //UnityEngine.Object.Destroy(mi.m_texIcon);
+                        }
+                    }
+                }
+            }
+
+            stopwatch.Stop();
+            logger.LogInfo($"Old Menus removed from the UI in {stopwatch.ElapsedMilliseconds}ms.");
+        }
+
+
+
         internal class InitPatch
         {
             // Adding .menu to the UI
@@ -161,13 +212,25 @@ namespace COM3D2.MaidLoader
             [HarmonyPostfix]
             internal static void OnCompleteFadeIn_Postfix()
             {
-                if (MaidLoader.refreshMod.newMenus.Count > 0)
+                if (MaidLoader.refreshMod.addedMenus.Count > 0)
                 {
                     MaidLoader.logger.LogInfo("Adding Mod folder's postponed .menu to the UI");
-                    MaidLoader.refreshMod.InitMenu(MaidLoader.refreshMod.newMenus);
-                    MaidLoader.refreshMod.newMenus.Clear();
+                    MaidLoader.refreshMod.AddMenuIcon(MaidLoader.refreshMod.addedMenus);
+                    MaidLoader.refreshMod.addedMenus.Clear();
                 }
             }
+        }
+
+        public class RefreshEventArgs : EventArgs
+        {
+            public RefreshEventArgs(string[] newMenus, string[] deletedMenus)
+            {
+                NewMenus = newMenus;
+                DeletedMenus = deletedMenus;
+            }
+
+            public string[] NewMenus { get; private set; }
+            public string[] DeletedMenus { get; private set; }
         }
     }
 }
