@@ -11,6 +11,7 @@ namespace COM3D2.MaidLoader
     {
         internal static Harmony harmony;
         internal static ManualLogSource logger = MaidLoader.logger;
+        internal static bool isAppendBGObjectDone = false;
 
         internal static void Init()
         {
@@ -109,6 +110,9 @@ namespace COM3D2.MaidLoader
             if (PhotoBGObjectData.category_list.ContainsKey("MaidLoader"))
                 return;
 
+            if (isAppendBGObjectDone)
+                return;
+
             //Works pretty much the same way as AppendBG() with a different .nei parsing 
             List<PhotoBGObjectData> customBGObjectData = new List<PhotoBGObjectData>();
 
@@ -178,23 +182,28 @@ namespace COM3D2.MaidLoader
                     PhotoBGObjectData.data.Add(photoBGObjectData);
                 }
             }
+
             // Add loaded assets to the category they belong to.
+            HashSet<string> hashSet2 = new HashSet<string>();
             for (int j = 0; j < customBGObjectData.Count; j++)
             {
                 if (!PhotoBGObjectData.category_list.ContainsKey(customBGObjectData[j].category))
                 {
+                    logger.LogWarning($"Adding category to category_list: {customBGObjectData[j].category}");
                     PhotoBGObjectData.category_list.Add(customBGObjectData[j].category, new List<PhotoBGObjectData>());
                 }
                 PhotoBGObjectData.category_list[customBGObjectData[j].category].Add(customBGObjectData[j]);
 
-                HashSet<string> hashSet2 = new HashSet<string>();
                 if (!hashSet2.Contains(customBGObjectData[j].category))
                 {
+                    logger.LogWarning($"Adding category to popup_category_list: {customBGObjectData[j].category}");
                     PhotoBGObjectData.popup_category_list.Add(new KeyValuePair<string, UnityEngine.Object>(customBGObjectData[j].category, null));
                     PhotoBGObjectData.popup_category_term_list.Add("ScenePhotoMode/背景オブジェクト/カテゴリー/" + customBGObjectData[j].category);
                     hashSet2.Add(customBGObjectData[j].category);
                 }
             }
+
+            isAppendBGObjectDone = true;
         }
 
         // Append Object categories and details by reading modded .nei
