@@ -52,6 +52,7 @@ COM3D2.ModMenuAccel.Patcher.dll
 ### ModRefresh
 This function adds a button in your gear menu to refresh the entire Mod folder, and adds any new mods to your game while it's running.  
 __*A few things to note:*__
+- Should you delete a mod it will also be removed from the game.
 - Everything is done in the background so it will not freeze the game while refreshing.
 - If in edit mode, the UI will blink once when new icons are added.
 
@@ -88,6 +89,40 @@ Advanced options bellow are reserved for game debugging should some mod cause is
 __*Relevant options:*__  
 - *Enable Mod override: When Enabled (default) Mod and QuickMod will override game's assets.*
 - *Enable Custom Mod override: When Enabled (default) use MaidLoader's custom Mod Override similar to ModLoader's. When Disabled, use the game's own Mod Priority System, less thorough but could proove safer in some cases.*  
+
+### Mod Refresh Event
+A Custom Event is raised when mods have been sucessfuly refreshed.
+Here's a small example for it.
+
+```csharp
+using BepInEx;
+using UnityEngine;
+
+namespace COM3D2.RefreshModEventTest
+{
+    [BepInPlugin("COM3D2.RefreshModEventTest", "RefreshModEventTest", "1.0")]
+    [BepInDependency("COM3D2.MaidLoader", BepInDependency.DependencyFlags.SoftDependency)]
+    public sealed class RefreshModEventTest : BaseUnityPlugin
+    {
+        private void Awake()
+        {
+            if(BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("COM3D2.MaidLoader"))
+                MaidLoader.RefreshMod.Refreshed += OnRefreshMod;
+        }
+
+        private static void OnRefreshMod(object sender, MaidLoader.RefreshMod.RefreshEventArgs e)
+        {
+            foreach (string str in e.NewMenus)
+                Debug.Log($"Added: {str}");
+
+            foreach (string str in e.DeletedMenus)
+                Debug.Log($"Removed: {str}");
+        }
+    }
+}
+
+```
+
 
 
 ## Notes
