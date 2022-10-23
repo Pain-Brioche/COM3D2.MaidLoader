@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MaidLoader
 {
-    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.2.0")]
+    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.2.1")]
     [BepInDependency("ShortStartLoader", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("COM3D2.CornerMessage", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("deathweasel.com3d2.api", BepInDependency.DependencyFlags.HardDependency)]

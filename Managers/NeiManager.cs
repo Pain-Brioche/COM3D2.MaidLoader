@@ -35,6 +35,8 @@ namespace COM3D2.MaidLoader
             //Skip if nothing found
             if (bg_nelist == null || 0 == bg_nelist.Length) { return; }
 
+            List<PhotoBGData> customBGData = new();
+
             //Go through each .nei files
             foreach (string str in bg_nelist)
             {
@@ -48,7 +50,7 @@ namespace COM3D2.MaidLoader
                         {
                             if (csvParser.Open(aFileBase2))
                             {
-                                // .nei are read by row (k) then column
+                                // .nei are read by row (r) then column
                                 for (int r = 1; r < csvParser.max_cell_y; r++)
                                 {
                                     int c = 1;
@@ -70,6 +72,7 @@ namespace COM3D2.MaidLoader
                                     string check = csvParser.GetCellAsString(c++, r);
                                     if (string.IsNullOrEmpty(check) || GameUty.BgFiles.ContainsKey(photoBGData.create_prefab_name.ToLower() + ".asset_bg"))
                                     {
+                                        customBGData.Add(photoBGData);
                                         PhotoBGData.data.Add(photoBGData);
                                     }
                                 }
@@ -97,7 +100,26 @@ namespace COM3D2.MaidLoader
                         photoBGData.id = photoBGData.create_prefab_name.GetHashCode().ToString();
                     }
 
+                    customBGData.Add(photoBGData);
                     PhotoBGData.data.Add(photoBGData);
+                }
+
+                // Add custom categories
+                HashSet<string> customCategories = new HashSet<string>();
+                for (int j = 0; j < customBGData.Count; j++)
+                {
+                    if (!PhotoBGData.category_list.ContainsKey(customBGData[j].category))
+                    {
+                        PhotoBGData.category_list.Add(customBGData[j].category, new List<PhotoBGData>());
+                    }
+                    PhotoBGData.category_list[customBGData[j].category].Add(customBGData[j]);
+
+                    if (!customCategories.Contains(customBGData[j].category))
+                    {
+                        PhotoBGData.popup_category_list.Add(new KeyValuePair<string, UnityEngine.Object>(customBGData[j].category, null));
+                        PhotoBGData.popup_category_term_list.Add("ScenePhotoMode/BG/カテゴリー/" + customBGData[j].category);
+                        customCategories.Add(customBGData[j].category);
+                    }
                 }
             }
         }
@@ -189,14 +211,12 @@ namespace COM3D2.MaidLoader
             {
                 if (!PhotoBGObjectData.category_list.ContainsKey(customBGObjectData[j].category))
                 {
-                    logger.LogWarning($"Adding category to category_list: {customBGObjectData[j].category}");
                     PhotoBGObjectData.category_list.Add(customBGObjectData[j].category, new List<PhotoBGObjectData>());
                 }
                 PhotoBGObjectData.category_list[customBGObjectData[j].category].Add(customBGObjectData[j]);
 
                 if (!hashSet2.Contains(customBGObjectData[j].category))
                 {
-                    logger.LogWarning($"Adding category to popup_category_list: {customBGObjectData[j].category}");
                     PhotoBGObjectData.popup_category_list.Add(new KeyValuePair<string, UnityEngine.Object>(customBGObjectData[j].category, null));
                     PhotoBGObjectData.popup_category_term_list.Add("ScenePhotoMode/背景オブジェクト/カテゴリー/" + customBGObjectData[j].category);
                     hashSet2.Add(customBGObjectData[j].category);
