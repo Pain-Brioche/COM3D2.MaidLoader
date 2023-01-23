@@ -79,10 +79,8 @@ namespace COM3D2.MaidLoader
             {
                 if (MaidLoader.SSL)
                 {
-                    logger.LogError("Patching SSL");
                     harmonySSL = Harmony.CreateAndPatchAll(typeof(SSLPatcher));
                 }
-                logger.LogError("Patching Game");
                 harmony = Harmony.CreateAndPatchAll(typeof(Patchers));
             }
 
