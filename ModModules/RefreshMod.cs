@@ -79,6 +79,9 @@ namespace COM3D2.MaidLoader
                     logger.LogInfo("Edit mode not started. Integration of new .menu to the UI postponed.");
                 } 
             }
+
+            //Required to add .asset references back.
+            AssetManager.InitPostfix();
             
             sw.Stop();
 

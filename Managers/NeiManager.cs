@@ -124,7 +124,7 @@ namespace COM3D2.MaidLoader
             }
         }
 
-        // Append Backgrounds by reading modded .nei
+        // Append Backgrounds Object by reading modded .nei
         // Added an auto append.
         internal static void AppendBGObject()
         {

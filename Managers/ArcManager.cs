@@ -150,95 +150,10 @@ namespace COM3D2.MaidLoader
                 FileSystemArchive gameFileSystem = GameUty.FileSystem as FileSystemArchive;
 
                 gameFileSystem.AddArchive(arc);
-                logger.LogInfo($"[{Path.GetFileName(arc)}] Loaded.");
+                logger.LogInfo($"■■■■■■■ [{Path.GetFileName(arc)}] Loaded.");
                 GameUty.loadArchiveList.Add(Path.GetFileNameWithoutExtension(arc).ToLower());
             }
         }
-
-        // Old Methods (to delete eventually)
-        /*
-        /// <summary>
-        /// Returns an edited block of IL code with additional .arc to load
-        /// </summary>
-        /// <param name="rawIL">IL Harmony sends</param>
-        /// <param name="arcList">.arc found in the mod folder</param>
-        /// <param name="addCustomArc">add a custom .arc for special files</param>
-        /// <returns></returns>
-        private static List<CodeInstruction> GetIL(List<CodeInstruction> rawIL, string lastArc)
-        {
-            var editedIL = new List<CodeInstruction>(rawIL);
-
-            // Itterate through the IL code Harmony sent
-            for (int i = 0; i < rawIL.Count; i++)
-            {
-                // Look for "parts2" latest .arc loaded by the game at any time.
-                if (rawIL[i].operand as string == lastArc)
-                {
-                    CodeInstruction instr = new(OpCodes.Call, AccessTools.Method(typeof(ArcManager), "LoadArc"));
-
-                    editedIL.Insert(i + 3, instr);  
-                    break;
-                }
-            }
-            return editedIL;
-        }
-        
-
-        /// <summary>
-        /// Returns an edited block of IL code with additional .arc to load
-        /// </summary>
-        /// <param name="rawIL">IL Harmony sends</param>
-        /// <param name="arcList">.arc found in the mod folder</param>
-        /// <param name="addCustomArc">add a custom .arc for special files</param>
-        /// <returns></returns>
-        private static List<CodeInstruction> GetEdited(List<CodeInstruction> rawIL,string lastArc = "parts2", bool addCustomArc = true)
-        {
-            var ILBlock = new List<CodeInstruction>();
-            var editedIL = new List<CodeInstruction>(rawIL);
-
-            if (addCustomArc)
-            {
-                arcList.Add(dummyArc);
-            }
-
-            // Itterate through the IL code Harmony sent
-            for (int i = 0; i < rawIL.Count; i++)
-            {
-                // Look for "parts2" latest .arc loaded by the game at any time.
-                if (rawIL[i].operand as string == lastArc)
-                {
-
-                    // make a line IL block for each .arc to load.
-                    foreach (string arc in arcList)
-                    {
-                        //Main.logger.LogMessage($"{arc}.arc found and will be loaded");
-                        var newIL = new List<CodeInstruction>();
-
-                        //Make it a deep copy of the part we want to edit
-                        newIL = rawIL.GetRange(i - 2, 5).ConvertAll(il => il.Clone());
-
-                        //Change parts2 with out custom .arc
-                        newIL[2].operand = arc;
-
-                        ILBlock.AddRange(newIL);
-                    }
-
-                    //Inject that bit of IL back
-                    editedIL.InsertRange(i + 3, ILBlock);
-
-                    
-                    for (int k = 0; k < editedIL.Count; k++)
-                    {
-                        logger.LogWarning($"New IL: {editedIL[k].opcode} {editedIL[k].operand}");
-                    }
-                    
-
-                    return editedIL;
-                }
-            }
-            return rawIL;
-        }
-        */
 
         internal class Patchers
         {
@@ -289,7 +204,7 @@ namespace COM3D2.MaidLoader
         internal class SSLPatcher
         {
             // Still the same thing for ShortStartLoader this time
-            [HarmonyPatch(typeof(MainBigRedo), nameof(MainBigRedo.UpdateFileSystemPath))]
+            [HarmonyPatch(typeof(StartupOptimize), nameof(StartupOptimize.UpdateFileSystemPath))]
             [HarmonyTranspiler]
             public static IEnumerable<CodeInstruction> UpdateFileSystemPathSSL_Transpiler(IEnumerable<CodeInstruction> instructions)
             {
