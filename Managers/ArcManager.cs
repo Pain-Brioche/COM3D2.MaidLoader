@@ -123,6 +123,8 @@ namespace COM3D2.MaidLoader
             {
                 logger.LogWarning($"{dummyArc} can't be accessed, eventual new files won't be added");
             }
+
+            arc.Clear();
         }
 
         private static void LoadArc()
@@ -150,6 +152,7 @@ namespace COM3D2.MaidLoader
                 gameFileSystem.AddArchive(arc);
                 logger.LogInfo($"■■■■■■■ [{Path.GetFileName(arc)}] Loaded.");
                 GameUty.loadArchiveList.Add(Path.GetFileNameWithoutExtension(arc).ToLower());
+
             }
         }
 
