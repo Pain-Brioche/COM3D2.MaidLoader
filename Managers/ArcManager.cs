@@ -17,6 +17,7 @@ namespace COM3D2.MaidLoader
     {
         private static ManualLogSource logger = MaidLoader.logger;
         private static Harmony harmony;
+        private static Harmony harmonySSL;
 
         private static readonly string gamePath = UTY.gameProjectPath;
         private static readonly string modPath = Path.Combine(gamePath, "Mod");
@@ -76,14 +77,13 @@ namespace COM3D2.MaidLoader
             //Only Patch what's needed when needed
             if (arcList.Count > 0 || files.Length > 0)
             {
-                if (!MaidLoader.SSL)
+                if (MaidLoader.SSL)
                 {
-                    harmony = Harmony.CreateAndPatchAll(typeof(Patchers));
+                    logger.LogError("Patching SSL");
+                    harmonySSL = Harmony.CreateAndPatchAll(typeof(SSLPatcher));
                 }
-                else
-                {
-                    harmony = Harmony.CreateAndPatchAll(typeof(SSLPatcher));
-                }
+                logger.LogError("Patching Game");
+                harmony = Harmony.CreateAndPatchAll(typeof(Patchers));
             }
 
             // No need make the dummy.arc if there's nothing to add.
@@ -187,7 +187,7 @@ namespace COM3D2.MaidLoader
                 //Initial checkpoint puts us where we want
                 var checkpoint = new CodeMatcher(instructions)
                     .MatchForward(true,
-                        new CodeMatch(l => l.opcode == OpCodes.Ldstr && (l.operand as string).Equals("parts_en2"))
+                        new CodeMatch(l => l.opcode == OpCodes.Ldstr && (l.operand as string).Equals("parts-en2"))
                     );
 
                 //Inject our method call~
