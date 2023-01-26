@@ -17,8 +17,7 @@ namespace COM3D2.MaidLoader
         private ManualLogSource logger = MaidLoader.logger;
         public static event EventHandler<RefreshEventArgs> Refreshed;
 
-        string gamePath = UTY.gameProjectPath + "\\";
-        //private List<string> menuList = GameUty.FileSystemMod.GetFileListAtExtension(".menu").ToList();
+        readonly string gamePath = UTY.gameProjectPath + "\\";
         private List<string> addedMenus = new();
 
 
@@ -38,7 +37,7 @@ namespace COM3D2.MaidLoader
             {
                 UpdateFileSystem();
             });
-            yield return new WaitUntil(() => update.IsCompleted == true);
+            yield return new WaitUntil(() => update.IsCompleted);
 
             if (update.IsFaulted)
             {
@@ -108,6 +107,9 @@ namespace COM3D2.MaidLoader
             FileSystemWindows oldFS = GameUty.m_ModFileSystem;
             GameUty.m_ModFileSystem = newFS;
 
+            //Update Cache
+            ModPriority.BuildModCache();
+
             // delete the old FS
             oldFS.Dispose();
         }
@@ -132,7 +134,7 @@ namespace COM3D2.MaidLoader
                 if (SceneEdit.GetMenuItemSetUP(mi, menu, false))
                 {
                     // ignore is this .menu is made for a man or has no icon
-                    if (!mi.m_bMan && !(mi.m_texIconRef == null))
+                    if (!mi.m_bMan && (mi.m_texIconRef != null))
                     {
                         //Doesn't look like much, but this is the most important part.
                         sceneEdit.AddMenuItemToList(mi);
@@ -160,8 +162,10 @@ namespace COM3D2.MaidLoader
                         else if (mi.m_strCateName.IndexOf("set_") != -1 && mi.m_strMenuFileName.IndexOf("_del") == -1)
                         {
                             mi.m_bGroupLeader = true;
-                            mi.m_listMember = new List<SceneEdit.SMenuItem>();
-                            mi.m_listMember.Add(mi);
+                            mi.m_listMember = new List<SceneEdit.SMenuItem>
+                            {
+                                mi
+                            };
                         }
                     }
                 }

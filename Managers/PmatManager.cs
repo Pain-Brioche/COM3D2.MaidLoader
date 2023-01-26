@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using BepInEx.Logging;
 using HarmonyLib;
+using System.Diagnostics;
 
 namespace COM3D2.MaidLoader
 {
@@ -23,7 +24,6 @@ namespace COM3D2.MaidLoader
         [HarmonyPrefix]
         private static bool ReadMaterial_Prefix()
         {
-
             Dictionary<int, KeyValuePair<string, float>> pmatlist = new();
             Dictionary<int, string> DupFilter = new();
 
@@ -127,6 +127,7 @@ namespace COM3D2.MaidLoader
 
                 ImportCM.m_hashPriorityMaterials = pmatlist;
             }
+
             return true;
         }
     }

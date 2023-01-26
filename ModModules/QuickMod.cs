@@ -38,7 +38,6 @@ namespace COM3D2.MaidLoader
             Harmony.CreateAndPatchAll(typeof(InitPatch));
 
             logger.LogInfo("Starting QuickMod");
-            //harmony2 = Harmony.CreateAndPatchAll(typeof(FileSystemModPatch));
 
             quickModFolderPath = GetQuickModFolderPath();
             logger.LogInfo($"QuickMod folder: {quickModFolderPath}");
@@ -63,7 +62,7 @@ namespace COM3D2.MaidLoader
         /// Returns QuickMod folder complete path depending on settings.
         /// If all of custom options fail default back to Mod_QuickMod folder.
         /// </summary>
-        private string GetQuickModFolderPath()
+        internal string GetQuickModFolderPath()
         {
             string path;
             
@@ -136,16 +135,6 @@ namespace COM3D2.MaidLoader
         {
             if (validFiles.Contains(Path.GetExtension(e.FullPath)))
             {
-                /*
-                string path = Path.GetDirectoryName(e.FullPath);
-
-                string relativePath = path.Replace(quickModFolderPath, string.Empty);
-
-                if (!updatedPath.Contains(relativePath))
-                    updatedPath.Add(relativePath);
-                
-                //logger.LogInfo($"New file detected: {Path.GetFileName(e.FullPath)}");
-                */
                 waitTimer = MaidLoader.quickModTimer.Value;
                 isNeedRefresh = true;
             }
@@ -208,7 +197,7 @@ namespace COM3D2.MaidLoader
             {
                 newMenus.AddRange(qmFileSystem.GetFileListAtExtension(".menu").Except(menuList));
             });
-            yield return new WaitUntil(() => getNewMenus.IsCompleted == true);
+            yield return new WaitUntil(() => getNewMenus.IsCompleted);
 
             //Parse added .menu, store them for later if SceneEdit is null
             if (newMenus != null && newMenus.Count != 0)
@@ -258,6 +247,9 @@ namespace COM3D2.MaidLoader
             QuickModFileSystem oldFS = qmFileSystem;
             qmFileSystem = newFS;
 
+            //update cache
+            ModPriority.BuildQuickModCache();
+
             // delete the old FS
             oldFS.Dispose();
         }
@@ -286,7 +278,7 @@ namespace COM3D2.MaidLoader
                 if (SceneEdit.GetMenuItemSetUP(mi, menu, false))
                 {
                     // ignore is this .menu is made for a man or has no icon
-                    if (!mi.m_bMan && !(mi.m_texIconRef == null))
+                    if (!mi.m_bMan && (mi.m_texIconRef != null))
                     {
                         //Doesn't look like much, but this is the most important part.
                         sceneEdit.AddMenuItemToList(mi);
@@ -334,9 +326,7 @@ namespace COM3D2.MaidLoader
             [HarmonyPatch(typeof(SceneEdit), nameof(SceneEdit.OnCompleteFadeIn))]
             [HarmonyPostfix]
             internal static void OnCompleteFadeIn_Postfix()
-            {
-                //MaidLoader.quickMod.Start();
-                
+            {                
                 if(MaidLoader.quickMod.newMenus.Count > 0)
                 {
                     MaidLoader.logger.LogInfo("Adding QuickMod's postponed .menu to the UI");
