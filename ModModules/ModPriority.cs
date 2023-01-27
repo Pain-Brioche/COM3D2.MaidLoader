@@ -56,7 +56,7 @@ namespace COM3D2.MaidLoader
             logger.LogInfo("Building QuickMod Cache");
             string quickModFolder = MaidLoader.quickMod.GetQuickModFolderPath();
 
-            IsExistentFileQuickModCache = Directory.GetFiles(quickModFolder, "*.*", SearchOption.AllDirectories).Select(Path.GetFileName).Distinct().ToDictionary(x => x.ToLower(), x => x);
+            IsExistentFileQuickModCache = Directory.GetFiles(quickModFolder, "*.*", SearchOption.AllDirectories).Select(x => Path.GetFileName(x).ToLower()).Distinct().ToDictionary(x => x);
         }
 
 

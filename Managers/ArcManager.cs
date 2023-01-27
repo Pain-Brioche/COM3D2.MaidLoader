@@ -135,14 +135,18 @@ namespace COM3D2.MaidLoader
             bool isAnnounced = false;
 
             //wait for the dummy .arc to be built
-            while (!buildArc.IsCompleted) 
+            if (buildArc!= null)
             {
-                if (!isAnnounced)
-                    logger.LogInfo("Waiting for MaidLoader.arc to be created");
+                while (!buildArc.IsCompleted)
+                {
+                    if (!isAnnounced)
+                        logger.LogInfo("Waiting for MaidLoader.arc to be created");
 
-                isAnnounced = true;
-                System.Threading.Thread.Sleep(50);               
+                    isAnnounced = true;
+                    System.Threading.Thread.Sleep(50);
+                }
             }
+
 
             // load each .arc in the list.
             foreach (string arc in arcList)
