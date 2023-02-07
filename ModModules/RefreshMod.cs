@@ -9,16 +9,17 @@ using System.IO;
 using UnityEngine.SceneManagement;
 using HarmonyLib;
 using System;
+using Mono.Cecil;
 
 namespace COM3D2.MaidLoader
 {
     public class RefreshMod
     {
-        private ManualLogSource logger = MaidLoader.logger;
+        private readonly ManualLogSource logger = MaidLoader.logger;
         public static event EventHandler<RefreshEventArgs> Refreshed;
 
-        readonly string gamePath = UTY.gameProjectPath + "\\";
-        private List<string> addedMenus = new();
+        private readonly string gamePath = $"{UTY.gameProjectPath}\\";
+        private List<string> newMenus = new();
 
 
         /// <summary>
@@ -26,11 +27,11 @@ namespace COM3D2.MaidLoader
         /// </summary>
         public IEnumerator RefreshCo()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            Stopwatch swRefresh = new Stopwatch();
+            swRefresh.Start();
 
-            //recover existing .menu from the old FileSystem
-            string[] oldFSMenus = GameUty.FileSystemMod.GetFileListAtExtension(".menu");
+            //recover existing .menu from the old FileSystem before it gets disposed
+            HashSet<string> oldFSMenus = new(GameUty.FileSystemMod.GetFileListAtExtension(".menu"));
 
             // Create a thread and wait for UpdateFileSystem to be done.
             Task update = Task.Factory.StartNew(() =>
@@ -47,65 +48,99 @@ namespace COM3D2.MaidLoader
                 yield break;
             }
 
-            //recover new .menu from the new FileSystem
-            string[] newFSMenus = GameUty.FileSystemMod.GetFileListAtExtension(".menu");
+            Stopwatch swMenus = new();
+            swMenus.Start();
 
-            //Get added .menu files, keep them aside in case edit mode isn't loaded.
-            addedMenus.AddRange(newFSMenus.Except(oldFSMenus));
+            //recover new .menu from the new FileSystem
+            HashSet<string> newFSMenus = new(GameUty.FileSystemMod.GetFileListAtExtension(".menu"));
+            logger.LogMessage($"Recover newMenus: {swMenus.ElapsedMilliseconds}");
+
+            //Get added .menu files
+            string[] addedMenus = { };
+            Task filterAdded = Task.Factory.StartNew(() =>
+            {
+                addedMenus = FilterMenus(newFSMenus, oldFSMenus).ToArray();
+                logger.LogMessage($"Filter Added: {swMenus.ElapsedMilliseconds}");
+            });
+            
 
             //Get deleted .menu files
-            string[] deletedMenus = oldFSMenus.Except(newFSMenus).ToArray();
+            string[] deletedMenus = { };
+            Task filterDeleted = Task.Factory.StartNew(() =>
+            {
+                deletedMenus = FilterMenus(oldFSMenus, newFSMenus).ToArray();
+                logger.LogMessage($"Filter Deleted: {swMenus.ElapsedMilliseconds}");
+            });
+
+            yield return new WaitUntil(() => filterAdded.IsCompleted && filterDeleted.IsCompleted);
 
             //Raise Refresh Event
-            Refreshed?.Invoke(this, new RefreshEventArgs(addedMenus.ToArray(), deletedMenus));
+            Refreshed?.Invoke(this, new RefreshEventArgs(addedMenus, deletedMenus));
+            logger.LogMessage($"Raise Event: {swMenus.ElapsedMilliseconds}");
 
             // Remove deleted .menu from the game's UI, only if edit mode is enabled
             if (deletedMenus != null && deletedMenus.Length != 0 && SceneManager.GetActiveScene().buildIndex == 5)
             {
                 DeleteMenuIcon(deletedMenus.Select(m => Path.GetFileName(m)).ToArray());
             }
+            logger.LogMessage($"Remove deleted Menus: {swMenus.ElapsedMilliseconds}");
 
             //Add eventual .menu to the game's UI, only is edit mode is enabled.
-            if (addedMenus != null && addedMenus.Count != 0)
+            newMenus.AddRange(addedMenus);
+            if (newMenus != null && newMenus.Count != 0)
             {
-                if(SceneManager.GetActiveScene().buildIndex == 5)
+                if (SceneManager.GetActiveScene().buildIndex == 5)
                 {
-                    AddMenuIcon(addedMenus);
-                    addedMenus.Clear();
+                    AddMenuIcon(newMenus);
+                    newMenus.Clear();
                 }
                 else
                 {
                     logger.LogInfo("Edit mode not started. Integration of new .menu to the UI postponed.");
-                } 
+                }
             }
+            logger.LogMessage($"Add new Menus: {swMenus.ElapsedMilliseconds}");
+
+            swMenus.Stop();
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", swMenus.Elapsed.Hours, swMenus.Elapsed.Minutes, swMenus.Elapsed.Seconds, swMenus.Elapsed.Milliseconds);
+            logger.LogInfo($"Menus filtering done in {elapsedTime}");
 
             //Required to add .asset references back.
             AssetManager.InitPostfix();
-            
-            sw.Stop();
+
+            swRefresh.Stop();
+            elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", swRefresh.Elapsed.Hours, swRefresh.Elapsed.Minutes, swRefresh.Elapsed.Seconds, swRefresh.Elapsed.Milliseconds);
+            logger.LogInfo($"Mod updated in {elapsedTime}");
 
             CornerMessage.DisplayMessage("Refresh over, new files added.", 6);
-            logger.LogInfo($"Mod updated in {sw.ElapsedMilliseconds}ms");
         }
 
         private void UpdateFileSystem()
         {
             logger.LogInfo("Updating Mod File System");
+            Stopwatch FSsw = new Stopwatch();
+            FSsw.Start();
+
             FileSystemWindows newFS = new();
 
             newFS.SetBaseDirectory(gamePath);
             newFS.AddFolder("Mod");
             newFS.AddAutoPathForAllFolder(true);
 
-            // Yes I know, but it's how Kiss made it.
+            
             while (!newFS.IsFinishedAddAutoPathJob(true))
             {
+                // Yes I know, but it's how Kiss made it.
             }
             newFS.ReleaseAddAutoPathJob();
 
             // keep the old FS to delete later
             FileSystemWindows oldFS = GameUty.m_ModFileSystem;
             GameUty.m_ModFileSystem = newFS;
+
+            FSsw.Stop();
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", FSsw.Elapsed.Hours, FSsw.Elapsed.Minutes, FSsw.Elapsed.Seconds, FSsw.Elapsed.Milliseconds / 10);
+            logger.LogInfo($"Mod File System updated in {elapsedTime}");
 
             //Update Cache
             ModPriority.BuildModCache();
@@ -121,14 +156,14 @@ namespace COM3D2.MaidLoader
             // Try to find SceneEdit
             SceneEdit sceneEdit = GameObject.Find("__SceneEdit__").GetComponent<SceneEdit>();
 
-            List<SceneEdit.SMenuItem> menuItemList = new List<SceneEdit.SMenuItem>(menus.Count);
-            Dictionary<int, List<int>> menuGroupMemberDic = new Dictionary<int, List<int>>();
+            List<SceneEdit.SMenuItem> menuItemList = new(menus.Count);
+            Dictionary<int, List<int>> menuGroupMemberDic = new();
 
             // Go through all added .menu and add them to the already existing SceneEdit lists
             foreach (string menu in menus)
             {
                 logger.LogInfo($"\tAdding: {Path.GetFileName(menu)}");
-                SceneEdit.SMenuItem mi = new SceneEdit.SMenuItem();
+                SceneEdit.SMenuItem mi = new();
 
                 // Parse the actual .menu
                 if (SceneEdit.GetMenuItemSetUP(mi, menu, false))
@@ -184,9 +219,9 @@ namespace COM3D2.MaidLoader
 
             foreach (SceneEdit.SCategory category in sceneEdit.m_listCategory)
             {
-                foreach(SceneEdit.SPartsType part in category.m_listPartsType)
+                foreach (SceneEdit.SPartsType part in category.m_listPartsType)
                 {
-                    for(int i = part.m_listMenu.Count - 1; i >=0; i--)
+                    for (int i = part.m_listMenu.Count - 1; i >= 0; i--)
                     {
                         if (deletedMenus.Contains(part.m_listMenu[i].m_strMenuFileName))
                         {
@@ -210,7 +245,16 @@ namespace COM3D2.MaidLoader
             logger.LogInfo($"Old Menus removed from the UI in {stopwatch.ElapsedMilliseconds}ms.");
         }
 
-
+        private IEnumerable<string> FilterMenus(HashSet<string> set1, HashSet<string> set2)
+        {
+            foreach (string element in set1)
+            {
+                if (!set2.Contains(element))
+                {
+                    yield return element;
+                }
+            }
+        }
 
         internal class InitPatch
         {
@@ -219,11 +263,11 @@ namespace COM3D2.MaidLoader
             [HarmonyPostfix]
             internal static void OnCompleteFadeIn_Postfix()
             {
-                if (MaidLoader.refreshMod.addedMenus.Count > 0)
+                if (MaidLoader.refreshMod.newMenus.Count > 0)
                 {
                     MaidLoader.logger.LogInfo("Adding Mod folder's postponed .menu to the UI");
-                    MaidLoader.refreshMod.AddMenuIcon(MaidLoader.refreshMod.addedMenus);
-                    MaidLoader.refreshMod.addedMenus.Clear();
+                    MaidLoader.refreshMod.AddMenuIcon(MaidLoader.refreshMod.newMenus);
+                    MaidLoader.refreshMod.newMenus.Clear();
                 }
             }
         }

@@ -2,3 +2,6 @@
 
 # Publicizer001: Accessing a member that was not originally public
 dotnet_diagnostic.Publicizer001.severity = suggestion
+
+# S125: Sections of code should not be commented out
+dotnet_diagnostic.S125.severity = suggestion

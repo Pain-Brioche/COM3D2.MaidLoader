@@ -16,8 +16,8 @@ namespace COM3D2.MaidLoader
     {
         private static ManualLogSource logger = MaidLoader.logger;
         private static Harmony harmony;
-        private static Dictionary<string,string> IsExistentFileCache = new();
-        private static Dictionary<string,string> IsExistentFileQuickModCache = new();
+        private static HashSet<string> isExistentFileCache = new();
+        private static HashSet<string> isExistentFileQuickModCache = new();
         private static EventWaitHandle ewh;
         private static Task buildCacheTask;
 
@@ -40,11 +40,12 @@ namespace COM3D2.MaidLoader
             if(Directory.Exists(modFolder))
             {
                 // Using dictionary as it is faster to search into.
-                IsExistentFileCache = Directory.GetFiles(modFolder, "*.*", SearchOption.AllDirectories).Select(x => Path.GetFileName(x).ToLower()).Distinct().ToDictionary(x => x);
+                isExistentFileCache = new(Directory.GetFiles(modFolder, "*.*", SearchOption.AllDirectories).Select(x => Path.GetFileName(x).ToLower()).Distinct());
 
                 sw.Stop();
-                logger.LogInfo($"Mod Cache built in: {sw.ElapsedMilliseconds}ms");
-                logger.LogInfo($"{IsExistentFileCache.Count} Entries.");
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", sw.Elapsed.Hours, sw.Elapsed.Minutes, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
+                logger.LogInfo($"Mod Cache built in: {elapsedTime}");
+                logger.LogInfo($"{isExistentFileCache.Count:N0} Entries.");
 
                 //Release EventWaitHandle
                 ewh.Set();
@@ -56,7 +57,7 @@ namespace COM3D2.MaidLoader
             logger.LogInfo("Building QuickMod Cache");
             string quickModFolder = MaidLoader.quickMod.GetQuickModFolderPath();
 
-            IsExistentFileQuickModCache = Directory.GetFiles(quickModFolder, "*.*", SearchOption.AllDirectories).Select(x => Path.GetFileName(x).ToLower()).Distinct().ToDictionary(x => x);
+            isExistentFileQuickModCache = new(Directory.GetFiles(quickModFolder, "*.*", SearchOption.AllDirectories).Select(x => Path.GetFileName(x).ToLower()).Distinct());
         }
 
 
@@ -87,9 +88,8 @@ namespace COM3D2.MaidLoader
         public static bool IsExistentFile_Prefix(string file_name, ref bool __result)
         {
             string file = file_name.ToLower();
-            if (IsExistentFileQuickModCache.ContainsKey(file) || IsExistentFileCache.ContainsKey(file))
+            if (isExistentFileQuickModCache.Contains(file) || isExistentFileCache.Contains(file))
             {
-                //logger.LogMessage($"{file} found");
                 __result = true;
                 return false;
             }
@@ -104,16 +104,14 @@ namespace COM3D2.MaidLoader
         public static bool FileOpen_Prefix(string file_name, ref AFileBase __result)
         {
             string file = file_name.ToLower();
-            if (MaidLoader.useQuickMod.Value && IsExistentFileQuickModCache.ContainsKey(file))
+            if (MaidLoader.useQuickMod.Value && isExistentFileQuickModCache.Contains(file))
             {
-                //logger.LogMessage($"{file} opened from QuickMod folder");
                 __result = MaidLoader.quickMod.qmFileSystem.FileOpen(file);
                 return false;                
             }
 
-            if (GameUty.FileSystemMod != null && IsExistentFileCache.ContainsKey(file))
+            if (GameUty.FileSystemMod != null && isExistentFileCache.Contains(file))
             {
-                //logger.LogMessage($"{file} opened from Mod folder");
                 __result =  GameUty.FileSystemMod.FileOpen(file_name);
                 return false;
             }
