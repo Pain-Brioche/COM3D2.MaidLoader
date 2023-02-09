@@ -7,7 +7,7 @@ using BepInEx.Logging;
 
 namespace COM3D2.MaidLoader
 {
-    internal class NeiManager
+    internal static class NeiManager
     {
         internal static Harmony harmony;
         internal static ManualLogSource logger = MaidLoader.logger;

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace COM3D2.MaidLoader
 {
-    internal class AssetManager
+    internal static class AssetManager
     {
         private static ManualLogSource logger = MaidLoader.logger;
         private static Harmony harmony;

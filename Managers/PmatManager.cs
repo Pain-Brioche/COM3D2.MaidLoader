@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace COM3D2.MaidLoader
 {
-    internal class PmatManager
+    internal static class PmatManager
     {
         private static Harmony harmony;
         internal static ManualLogSource logger = MaidLoader.logger;

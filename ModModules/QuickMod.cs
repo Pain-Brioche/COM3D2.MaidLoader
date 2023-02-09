@@ -8,6 +8,7 @@ using UnityEngine;
 using BepInEx.Logging;
 using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
+using static SceneEdit;
 
 namespace COM3D2.MaidLoader
 {
@@ -204,7 +205,7 @@ namespace COM3D2.MaidLoader
             {
                 if (SceneManager.GetActiveScene().buildIndex == 5)
                 {
-                    InitMenu(newMenus);
+                    EditModeUI.AddMenuIcon(newMenus);
                     menuList.AddRange(newMenus);
                     newMenus.Clear();
                 }
@@ -220,7 +221,6 @@ namespace COM3D2.MaidLoader
             CornerMessage.DisplayMessage("Refresh over, new files added.", 6);
             logger.LogInfo($"QM File System updated in {sw.ElapsedMilliseconds}ms");
         }
-
 
         // Build the basic needed for a new FileSystem
         // Don't forget than COM's FileSystem works on a folder basis relative to the game's path.
@@ -253,70 +253,6 @@ namespace COM3D2.MaidLoader
             // delete the old FS
             oldFS.Dispose();
         }
-
-
-        /// <summary>
-        /// Do everything needed to add a .menu to the edit mode panels.
-        /// </summary>
-        private void InitMenu(List<string> menus)
-        {
-            logger.LogInfo($"Adding {menus.Count} menus. This might freeze the game for a short time.");
-
-            // Try to find SceneEdit
-            SceneEdit sceneEdit = GameObject.Find("__SceneEdit__").GetComponent<SceneEdit>();
-
-            List<SceneEdit.SMenuItem> menuItemList = new List<SceneEdit.SMenuItem>(menus.Count);
-            Dictionary<int, List<int>> menuGroupMemberDic = new Dictionary<int, List<int>>();
-
-            // Go through all added .menu and add them to the already existing SceneEdit lists
-            foreach (string menu in newMenus)
-            {
-                logger.LogInfo($"\tAdding: {Path.GetFileName(menu)}");
-                SceneEdit.SMenuItem mi = new SceneEdit.SMenuItem();
-
-                // Parse the actual .menu
-                if (SceneEdit.GetMenuItemSetUP(mi, menu, false))
-                {
-                    // ignore is this .menu is made for a man or has no icon
-                    if (!mi.m_bMan && (mi.m_texIconRef != null))
-                    {
-                        //Doesn't look like much, but this is the most important part.
-                        sceneEdit.AddMenuItemToList(mi);
-                        menuItemList.Add(mi);
-
-                        //Not sure about this one, 
-                        if (!sceneEdit.m_menuRidDic.ContainsKey(mi.m_nMenuFileRID))
-                        {
-                            sceneEdit.m_menuRidDic.Add(mi.m_nMenuFileRID, mi);
-                        }
-
-                        // check for _Zn parents.
-                        string parentMenuName = SceneEdit.GetParentMenuFileName(mi);
-                        if (!string.IsNullOrEmpty(parentMenuName))
-                        {
-                            int hashCode = parentMenuName.GetHashCode();
-                            if (!menuGroupMemberDic.ContainsKey(hashCode))
-                            {
-                                menuGroupMemberDic.Add(hashCode, new List<int>());
-                            }
-                            menuGroupMemberDic[hashCode].Add(mi.m_strMenuFileName.ToLower().GetHashCode());
-                        }
-
-                        // Check for _set and _del special cases
-                        else if (mi.m_strCateName.IndexOf("set_") != -1 && mi.m_strMenuFileName.IndexOf("_del") == -1)
-                        {
-                            mi.m_bGroupLeader = true;
-                            mi.m_listMember = new List<SceneEdit.SMenuItem>();
-                            mi.m_listMember.Add(mi);
-                        }
-                    }
-                }
-            }
-
-            // Deals with .mod and sub menus
-            sceneEdit.StartCoroutine(sceneEdit.FixedInitMenu(menuItemList, sceneEdit.m_menuRidDic, menuGroupMemberDic));
-            sceneEdit.StartCoroutine(sceneEdit.CoLoadWait());
-        }
 #endregion
 
 
@@ -330,7 +266,7 @@ namespace COM3D2.MaidLoader
                 if(MaidLoader.quickMod.newMenus.Count > 0)
                 {
                     MaidLoader.logger.LogInfo("Adding QuickMod's postponed .menu to the UI");
-                    MaidLoader.quickMod.InitMenu(MaidLoader.quickMod.newMenus);
+                    EditModeUI.AddMenuIcon(MaidLoader.quickMod.newMenus);
                     MaidLoader.quickMod.newMenus.Clear();
                 }                
             }

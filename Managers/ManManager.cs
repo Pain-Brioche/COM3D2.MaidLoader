@@ -3,7 +3,7 @@ using static SceneEdit;
 
 namespace COM3D2.MaidLoader
 {
-    internal class ManManager
+    internal static class ManManager
     {
         private static Harmony harmony;
         internal static void Init()

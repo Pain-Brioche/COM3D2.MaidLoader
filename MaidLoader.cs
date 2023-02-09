@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MaidLoader
 {
-    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.3.3")]
+    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.4.1")]
     [BepInDependency("ShortStartLoader", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("COM3D2.CornerMessage", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("deathweasel.com3d2.api", BepInDependency.DependencyFlags.HardDependency)]
@@ -127,6 +127,8 @@ namespace COM3D2.MaidLoader
 
                 if (useQuickMod.Value && quickMod == null)
                     quickMod = new QuickMod();
+
+
             }
         }
 
