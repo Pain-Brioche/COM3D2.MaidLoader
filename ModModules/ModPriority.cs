@@ -87,6 +87,8 @@ namespace COM3D2.MaidLoader
         [HarmonyPrefix]
         public static bool IsExistentFile_Prefix(string file_name, ref bool __result)
         {
+            if (string.IsNullOrEmpty(file_name)) { return true; }
+
             string file = file_name.ToLower();
             if (isExistentFileQuickModCache.Contains(file) || isExistentFileCache.Contains(file))
             {
