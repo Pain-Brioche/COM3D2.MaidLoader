@@ -165,6 +165,7 @@ namespace COM3D2.MaidLoader
                                     photoBGObjectData.create_prefab_name = csvParser.GetCellAsString(num++, i);
                                     photoBGObjectData.create_asset_bundle_name = csvParser.GetCellAsString(num++, i);
 
+                                    //assign id from prefab/bundles string, this is done because save/load of objects in photomode is based on id
                                     if (!string.IsNullOrEmpty(photoBGObjectData.create_prefab_name))
                                     {
                                         photoBGObjectData.id = photoBGObjectData.create_prefab_name.GetHashCode();

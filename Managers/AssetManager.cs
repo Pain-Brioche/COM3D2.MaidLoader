@@ -40,10 +40,10 @@ namespace COM3D2.MaidLoader
         [HarmonyPrefix]
         public static bool LoadPrefix(string path, ref UnityEngine.Object __result)
         {
-            string assetName = Path.GetFileName(path).ToLower() + ".asset_bg";
+            string assetName = Path.GetFileName(path).ToLower();
 
             //Check for .asset_bg instead of loading the original ressource
-            if (GameUty.BgFiles.ContainsKey(assetName))
+            if (GameUty.BgFiles.ContainsKey(assetName + ".asset_bg"))
             {
                 __result = GameMain.Instance.BgMgr.CreateAssetBundle(assetName);
                 return false;
