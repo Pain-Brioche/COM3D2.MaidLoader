@@ -122,7 +122,7 @@ namespace COM3D2.MaidLoader
         {
             if (scene.name == "SceneTitle")
             {
-                if(refreshMod == null)
+                if (refreshMod == null)
                     refreshMod = new RefreshMod();
 
                 if (useQuickMod.Value && quickMod == null)

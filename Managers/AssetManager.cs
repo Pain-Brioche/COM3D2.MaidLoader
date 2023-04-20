@@ -27,10 +27,11 @@ namespace COM3D2.MaidLoader
             for (int i = 0; i < array.Length; i++)
             {
                 string fileName = Path.GetFileName(array[i]);
-                logger.LogDebug($"Adding asset: {fileName}");
 
                 //Overrides or adds .asset_bg to the background dictionary
                 GameUty.BgFiles[fileName] = GameUty.FileSystemMod;
+
+                logger.LogDebug($"Adding asset: {fileName}");              
             }
         }
 
