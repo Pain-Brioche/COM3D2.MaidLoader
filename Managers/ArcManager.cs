@@ -43,7 +43,7 @@ namespace COM3D2.MaidLoader
             {
                 sw.Start();
 
-                if (useDedicatedSSFolder & !Directory.Exists(modPath + "\\Scripts&Sounds"))
+                if (useDedicatedSSFolder && !Directory.Exists(modPath + "\\Scripts&Sounds"))
                     Directory.CreateDirectory(modPath + "\\Scripts&Sounds");                
 
                 logger.LogInfo("Looking for .ks/.ogg");
@@ -113,7 +113,6 @@ namespace COM3D2.MaidLoader
             }
 
             // saving the dummy .arc
-            string arcName = dummyArc;
             try
             {
                 using FileStream fStream = File.Create(Path.Combine(BepInEx.Paths.CachePath, dummyArc));

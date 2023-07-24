@@ -4,6 +4,10 @@ using System.IO;
 using System.Linq;
 using HarmonyLib;
 using BepInEx.Logging;
+using ShortStartLoader;
+using System.Reflection.Emit;
+using Mono.Cecil;
+using UnityEngine;
 
 namespace COM3D2.MaidLoader
 {
@@ -12,6 +16,7 @@ namespace COM3D2.MaidLoader
         internal static Harmony harmony;
         internal static ManualLogSource logger = MaidLoader.logger;
         internal static bool isAppendBGObjectDone = false;
+
 
         internal static void Init()
         {
@@ -74,6 +79,7 @@ namespace COM3D2.MaidLoader
                                     {
                                         customBGData.Add(photoBGData);
                                         PhotoBGData.data.Add(photoBGData);
+                                        logger.LogDebug($"Adding: {photoBGData.name} to {photoBGData.category}");
                                     }
                                 }
                             }
@@ -90,7 +96,7 @@ namespace COM3D2.MaidLoader
                 {
                     PhotoBGData photoBGData = new PhotoBGData();
                     photoBGData.id = "";
-                    photoBGData.category = "昼"; //Always the same category (Day)
+                    photoBGData.category = "AutoBG"; //Always the same category (Day)
                     photoBGData.name = Path.GetFileNameWithoutExtension(filename);
                     photoBGData.create_prefab_name = Path.GetFileNameWithoutExtension(filename);
 
@@ -102,24 +108,34 @@ namespace COM3D2.MaidLoader
 
                     customBGData.Add(photoBGData);
                     PhotoBGData.data.Add(photoBGData);
+                    logger.LogDebug($"Auto Adding: {photoBGData.name} to category {photoBGData.category}");
                 }
+            }
 
-                // Add custom categories
-                HashSet<string> customCategories = new HashSet<string>();
-                for (int j = 0; j < customBGData.Count; j++)
+            // Add custom categories
+            HashSet<string> customCategories = new HashSet<string>();
+            // Add already existing categories so they aren't added twice.
+            foreach(string term in PhotoBGData.popup_category_term_list)
+            {
+                string category = term.Remove(0,24);
+                customCategories.Add(category);
+            }
+
+            foreach (var customBG in customBGData)
+            {
+                if (!PhotoBGData.category_list.ContainsKey(customBG.category))
                 {
-                    if (!PhotoBGData.category_list.ContainsKey(customBGData[j].category))
-                    {
-                        PhotoBGData.category_list.Add(customBGData[j].category, new List<PhotoBGData>());
-                    }
-                    PhotoBGData.category_list[customBGData[j].category].Add(customBGData[j]);
+                    PhotoBGData.category_list.Add(customBG.category, new List<PhotoBGData>());
+                }
+                PhotoBGData.category_list[customBG.category].Add(customBG);
 
-                    if (!customCategories.Contains(customBGData[j].category))
-                    {
-                        PhotoBGData.popup_category_list.Add(new KeyValuePair<string, UnityEngine.Object>(customBGData[j].category, null));
-                        PhotoBGData.popup_category_term_list.Add("ScenePhotoMode/BG/カテゴリー/" + customBGData[j].category);
-                        customCategories.Add(customBGData[j].category);
-                    }
+
+                if (!customCategories.Contains(customBG.category))
+                {
+                    logger.LogDebug($"New category added: {customBG.category}");
+                    PhotoBGData.popup_category_list.Add(new KeyValuePair<string, UnityEngine.Object>(customBG.category, null));
+                    PhotoBGData.popup_category_term_list.Add("ScenePhotoMode/BG/カテゴリー/" + customBG.category);
+                    customCategories.Add(customBG.category);
                 }
             }
         }
@@ -203,11 +219,20 @@ namespace COM3D2.MaidLoader
 
                     customBGObjectData.Add(photoBGObjectData);
                     PhotoBGObjectData.data.Add(photoBGObjectData);
+
+                    logger.LogDebug($"Auto Adding: {photoBGObjectData.name} to category {photoBGObjectData.category}");
                 }
             }
 
             // Add loaded assets to the category they belong to.
             HashSet<string> hashSet2 = new HashSet<string>();
+            // Add already existing categories so they aren't added twice.
+            foreach (string term in PhotoBGObjectData.popup_category_term_list)
+            {
+                string category = term.Remove(0, 30);
+                hashSet2.Add(category);
+            }
+
             for (int j = 0; j < customBGObjectData.Count; j++)
             {
                 if (!PhotoBGObjectData.category_list.ContainsKey(customBGObjectData[j].category))
@@ -379,7 +404,8 @@ namespace COM3D2.MaidLoader
         {
             NeiManager.AppendBG();
         }
-
+        
+        
         [HarmonyPatch(typeof(PhotoBGObjectData), nameof(PhotoBGObjectData.Create))]
         [HarmonyPostfix]
         private static void PhotoBGObjectData_Create_Postfix()
