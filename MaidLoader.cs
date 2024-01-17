@@ -174,7 +174,7 @@ namespace COM3D2.MaidLoader
         }
         internal static class TryCornerMessage
         {
-            internal static void DisplayMessage(string mess, float dur) => COM3D2.CornerMessage.Main.DisplayMessage(mess, dur);
+            internal static void DisplayMessage(string mess, float dur) => COM3D2.CornerMessage.CornerMessage.DisplayMessage(mess, dur);
         }
     }
 }
