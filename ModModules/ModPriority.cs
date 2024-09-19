@@ -39,7 +39,7 @@ namespace COM3D2.MaidLoader
 
             if(Directory.Exists(modFolder))
             {
-                // Using dictionary as it is faster to search into.
+                // Using HashSet as it is faster to search into.
                 isExistentFileCache = new(Directory.GetFiles(modFolder, "*.*", SearchOption.AllDirectories).Select(x => Path.GetFileName(x).ToLower()).Distinct());
 
                 sw.Stop();
@@ -95,6 +95,7 @@ namespace COM3D2.MaidLoader
                 __result = true;
                 return false;
             }
+
             return true;
         }
 
@@ -105,7 +106,7 @@ namespace COM3D2.MaidLoader
         [HarmonyPrefix]
         public static bool FileOpen_Prefix(string file_name, ref AFileBase __result)
         {
-            string file = file_name.ToLower();
+            string file = Path.GetFileName(file_name).ToLower();
             if (MaidLoader.useQuickMod.Value && isExistentFileQuickModCache.Contains(file))
             {
                 __result = MaidLoader.quickMod.qmFileSystem.FileOpen(file);
@@ -117,6 +118,13 @@ namespace COM3D2.MaidLoader
                 __result =  GameUty.FileSystemMod.FileOpen(file_name);
                 return false;
             }
+
+/*            if (file_name.EndsWith("dance_subtitle.nei"))
+            {
+                __result = GameUty.FileSystemMod.FileOpen(file_name);
+                return false;
+            }*/
+            
             return true;
         }
     }

@@ -59,6 +59,13 @@ namespace COM3D2.MaidLoader
 
                 sw.Stop();
                 logger.LogInfo($"Found {files.Length} file(s) in {sw.ElapsedMilliseconds}ms.");
+
+                if (files.Length > 0)
+                {
+                    foreach (string file in files)
+                        logger.LogDebug(file);
+                }
+
             }
 
             //Look for .arc in the entire Mod folder.
@@ -72,6 +79,11 @@ namespace COM3D2.MaidLoader
 
                 sw.Stop();
                 logger.LogInfo($"Found {arcList.Count} file(s) in {sw.ElapsedMilliseconds}ms.");
+                if (arcList.Count > 0)
+                {
+                    foreach (string arc in arcList)
+                        logger.LogDebug(arc);
+                }
             }
 
             //Only Patch what's needed when needed
