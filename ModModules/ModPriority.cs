@@ -16,6 +16,7 @@ namespace COM3D2.MaidLoader
     {
         private static ManualLogSource logger = MaidLoader.logger;
         private static Harmony harmony;
+        internal static string[] modCache = new();
         private static HashSet<string> isExistentFileCache = new();
         private static HashSet<string> isExistentFileQuickModCache = new();
         private static EventWaitHandle ewh;
@@ -40,7 +41,8 @@ namespace COM3D2.MaidLoader
             if(Directory.Exists(modFolder))
             {
                 // Using HashSet as it is faster to search into.
-                isExistentFileCache = new(Directory.GetFiles(modFolder, "*.*", SearchOption.AllDirectories).Select(x => Path.GetFileName(x).ToLower()).Distinct());
+                modCache = Directory.GetFiles(modFolder, "*.*", SearchOption.AllDirectories);
+                isExistentFileCache = new(modCache.Select(x => Path.GetFileName(x).ToLower()).Distinct());
 
                 sw.Stop();
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", sw.Elapsed.Hours, sw.Elapsed.Minutes, sw.Elapsed.Seconds, sw.Elapsed.Milliseconds);
@@ -117,14 +119,7 @@ namespace COM3D2.MaidLoader
             {
                 __result =  GameUty.FileSystemMod.FileOpen(file_name);
                 return false;
-            }
-
-/*            if (file_name.EndsWith("dance_subtitle.nei"))
-            {
-                __result = GameUty.FileSystemMod.FileOpen(file_name);
-                return false;
-            }*/
-            
+            }            
             return true;
         }
     }

@@ -4,10 +4,6 @@ using System.IO;
 using System.Linq;
 using HarmonyLib;
 using BepInEx.Logging;
-using ShortStartLoader;
-using System.Reflection.Emit;
-using Mono.Cecil;
-using UnityEngine;
 
 namespace COM3D2.MaidLoader
 {
@@ -34,12 +30,12 @@ namespace COM3D2.MaidLoader
         internal static void AppendBG()
         {
             //Retreive files located in the PhotoBG_NEI Mod folder
-            string[] bg_nelist = null;
-            bg_nelist = GameUty.FileSystemMod.GetList("PhotoBG_NEI", AFileSystemBase.ListType.AllFile);
 
-            //Skip if nothing found
-            if (bg_nelist == null || 0 == bg_nelist.Length) { return; }
 
+            // Fix attempt, since 2.38 GetFile doesn't filter by folder            
+            //string[] bg_nelist = GameUty.FileSystemMod.GetList("Mod", AFileSystemBase.ListType.AllFile);
+            IEnumerable<string> bg_nelist = ModPriority.modCache.Where(p => p.Contains("PhotoBG_NEI")).Select(f => Path.GetFileName(f));            
+            
             List<PhotoBGData> customBGData = new();
 
             //Go through each .nei files
@@ -154,10 +150,9 @@ namespace COM3D2.MaidLoader
             //Works pretty much the same way as AppendBG() with a different .nei parsing 
             List<PhotoBGObjectData> customBGObjectData = new List<PhotoBGObjectData>();
 
-            string[] BgObj_list = null;
-            BgObj_list = GameUty.FileSystemMod.GetList("PhotoBG_OBJ_NEI", AFileSystemBase.ListType.AllFile);
-
-            if (BgObj_list == null || 0 == BgObj_list.Length) { return; }
+            // Fix attempt, since 2.38 GetFile doesn't filter by folder
+            //string[] BgObj_list = GameUty.FileSystemMod.GetList("PhotoBG_OBJ_NEI", AFileSystemBase.ListType.AllFile);
+            IEnumerable<string> BgObj_list = ModPriority.modCache.Where(p => p.Contains("PhotoBG_OBJ_NEI")).Select(f => Path.GetFileName(f));
 
             foreach (string str in BgObj_list)
             {
@@ -255,14 +250,9 @@ namespace COM3D2.MaidLoader
         // Append Object categories and details by reading modded .nei
         internal static void AppendDeskData()
         {
-            string[] DeskItemList = GameUty.FileSystemMod.GetList("DeskItem_NEI", AFileSystemBase.ListType.AllFile);
-
-            if (DeskItemList == null || DeskItemList.Length == 0)
-            {
-                logger.LogDebug("DeskItemList returned null or empty");
-                return; 
-            }
-
+            //string[] DeskItemList = GameUty.FileSystemMod.GetList("DeskItem_NEI", AFileSystemBase.ListType.AllFile);
+            // Fix attempt, since 2.38 GetFile doesn't filter by folder
+            IEnumerable<string> DeskItemList = ModPriority.modCache.Where(p => p.Contains("DeskItem_NEI")).Select(f => Path.GetFileName(f));
 
             foreach (string str in DeskItemList)
             {
@@ -350,10 +340,10 @@ namespace COM3D2.MaidLoader
         // Append Motions, never saw this one used, but you never know.
         internal static void AppendMotionData()
         {
-            string[] PhotoMotNei = null;
-            PhotoMotNei = GameUty.FileSystemMod.GetList("PhotMot_NEI", AFileSystemBase.ListType.AllFile);
-
-            if (PhotoMotNei == null || PhotoMotNei.Length == 0) { return; }
+            //string[] PhotoMotNei = null;
+            //PhotoMotNei = GameUty.FileSystemMod.GetList("PhotMot_NEI", AFileSystemBase.ListType.AllFile);
+            // Fix attempt, since 2.38 GetFile doesn't filter by folder
+            IEnumerable<string> PhotoMotNei = ModPriority.modCache.Where(p => p.Contains("PhotMot_NEI")).Select(f => Path.GetFileName(f));
 
             foreach (string str in PhotoMotNei)
             {
