@@ -261,9 +261,8 @@ namespace COM3D2.MaidLoader
 
                 // Adding MaidLoader's custom category
                 if (!DeskManager.item_category_data_dic.ContainsKey(777))
-                {
                     DeskManager.item_category_data_dic.Add(777, "MaidLoader");
-                }
+                
 
                 // Check if the file is category type or detail type to determine the processing
                 // Only files that contain category in their name are assumed to be category files all others nei files are assumbed to be detail files
@@ -315,7 +314,8 @@ namespace COM3D2.MaidLoader
                                         if (!string.IsNullOrEmpty(itemData.prefab_name))
                                         {
                                             itemData.id = itemData.prefab_name.GetHashCode();
-                                            DeskManager.item_detail_data_dic.Add(itemData.id, itemData);
+                                            if (!DeskManager.item_detail_data_dic.ContainsKey(itemData.id))
+                                                DeskManager.item_detail_data_dic.Add(itemData.id, itemData);
                                         }
 
                                         // check if entry refers to asset bundle, and if it is, check if it exists before addding the data
