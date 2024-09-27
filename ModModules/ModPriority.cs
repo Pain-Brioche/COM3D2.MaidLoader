@@ -16,7 +16,7 @@ namespace COM3D2.MaidLoader
     {
         private static ManualLogSource logger = MaidLoader.logger;
         private static Harmony harmony;
-        internal static string[] modCache = new();
+        internal static string[] modCache;
         private static HashSet<string> isExistentFileCache = new();
         private static HashSet<string> isExistentFileQuickModCache = new();
         private static EventWaitHandle ewh;

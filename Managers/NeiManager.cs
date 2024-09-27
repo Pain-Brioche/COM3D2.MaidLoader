@@ -322,7 +322,8 @@ namespace COM3D2.MaidLoader
                                         else if (!string.IsNullOrEmpty(itemData.asset_name) && GameUty.BgFiles.ContainsKey(itemData.asset_name + ".asset_bg"))
                                         {
                                             itemData.id = itemData.asset_name.GetHashCode();
-                                            DeskManager.item_detail_data_dic.Add(itemData.id, itemData);
+                                            if (!DeskManager.item_detail_data_dic.ContainsKey(itemData.id))
+                                                DeskManager.item_detail_data_dic.Add(itemData.id, itemData);
                                         }
                                     }
                                 }
