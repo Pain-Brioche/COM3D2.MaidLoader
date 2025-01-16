@@ -4,6 +4,7 @@ using System.Text;
 using BepInEx.Logging;
 using HarmonyLib;
 using System.Diagnostics;
+using System.Linq;
 
 namespace COM3D2.MaidLoader
 {
@@ -124,8 +125,17 @@ namespace COM3D2.MaidLoader
                         }
                     }
                 }
-
-                ImportCM.m_hashPriorityMaterials = pmatlist;
+                foreach (var kvp in ImportCM.m_hashPriorityMaterials)
+                {
+                    if (ImportCM.m_hashPriorityMaterials.ContainsKey(kvp.Key))
+                    {
+                        ImportCM.m_hashPriorityMaterials[kvp.Key] = kvp.Value;
+                    }
+                    else
+                    {
+                        ImportCM.m_hashPriorityMaterials.Add(kvp.Key, kvp.Value);
+                    }
+                }
             }
 
             return true;

@@ -3,12 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32819.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COM3D2.MaidLoader", "COM3D2.MaidLoader.csproj", "{203119E5-DC85-47A3-A225-8E363289C173}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COM3D2.MaidLoader", "COM3D2.MaidLoader\COM3D2.MaidLoader.csproj", "{203119E5-DC85-47A3-A225-8E363289C173}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5953B9EF-4D80-4CF3-A715-7E309953E9CB}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "COM3D2.MaidLoader.Core", "COM3D2.MaidLoader.Core\COM3D2.MaidLoader.Core.shproj", "{F5C27FAB-FF4D-42C5-9DB0-C83D197FD235}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "COM3D25.MaidLoader", "COM3D2_5.MaidLoader\COM3D25.MaidLoader.csproj", "{7E04EAF4-605F-4C95-AEDF-9B08AC525E9A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,13 +22,22 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{203119E5-DC85-47A3-A225-8E363289C173}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{203119E5-DC85-47A3-A225-8E363289C173}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{203119E5-DC85-47A3-A225-8E363289C173}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{203119E5-DC85-47A3-A225-8E363289C173}.Release|Any CPU.Build.0 = Release|Any CPU
+		{203119E5-DC85-47A3-A225-8E363289C173}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{203119E5-DC85-47A3-A225-8E363289C173}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{7E04EAF4-605F-4C95-AEDF-9B08AC525E9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E04EAF4-605F-4C95-AEDF-9B08AC525E9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E04EAF4-605F-4C95-AEDF-9B08AC525E9A}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E04EAF4-605F-4C95-AEDF-9B08AC525E9A}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {518C32CA-7BE0-4D3A-80E2-2E9F7BA0557C}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		COM3D2.MaidLoader.Core\COM3D2.MaidLoader.Core.projitems*{203119e5-dc85-47a3-a225-8e363289c173}*SharedItemsImports = 5
+		COM3D2.MaidLoader.Core\COM3D2.MaidLoader.Core.projitems*{7e04eaf4-605f-4c95-aedf-9b08ac525e9a}*SharedItemsImports = 5
+		COM3D2.MaidLoader.Core\COM3D2.MaidLoader.Core.projitems*{f5c27fab-ff4d-42c5-9db0-c83d197fd235}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal

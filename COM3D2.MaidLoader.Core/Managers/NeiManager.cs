@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using HarmonyLib;
 using BepInEx.Logging;
+using System.Reflection;
 
 namespace COM3D2.MaidLoader
 {
@@ -305,23 +306,28 @@ namespace COM3D2.MaidLoader
                                 {
                                     if (csvParser.IsCellToExistData(0, j))
                                     {
-                                        int cellAsInteger2 = csvParser.GetCellAsInteger(0, j);
                                         DeskManager.ItemData itemData = new DeskManager.ItemData(csvParser, j);
+                                        int newID = 0;
 
                                         // check if it's a prefab data and add it if it is
                                         // is impossible to check if prefab exists in resources files
                                         // so if referenced prefab doesn't exist in game files, the entry isn't going to work properly in game
                                         if (!string.IsNullOrEmpty(itemData.prefab_name))
                                         {
-                                            itemData.id = itemData.prefab_name.GetHashCode();
-                                            if (!DeskManager.item_detail_data_dic.ContainsKey(itemData.id))
-                                                DeskManager.item_detail_data_dic.Add(itemData.id, itemData);
+                                            newID = itemData.prefab_name.GetHashCode();
                                         }
 
                                         // check if entry refers to asset bundle, and if it is, check if it exists before addding the data
                                         else if (!string.IsNullOrEmpty(itemData.asset_name) && GameUty.BgFiles.ContainsKey(itemData.asset_name + ".asset_bg"))
                                         {
-                                            itemData.id = itemData.asset_name.GetHashCode();
+                                            newID = itemData.asset_name.GetHashCode();
+                                        }
+
+                                        if (newID != 0)
+                                        {
+                                            FieldInfo fieldInfo = typeof(DeskManager.ItemData).GetField("id", BindingFlags.Public | BindingFlags.Instance);
+                                            fieldInfo.SetValue(itemData, newID);
+
                                             if (!DeskManager.item_detail_data_dic.ContainsKey(itemData.id))
                                                 DeskManager.item_detail_data_dic.Add(itemData.id, itemData);
                                         }
@@ -337,6 +343,7 @@ namespace COM3D2.MaidLoader
                 }
             }
         }
+
 
         // Append Motions, never saw this one used, but you never know.
         internal static void AppendMotionData()

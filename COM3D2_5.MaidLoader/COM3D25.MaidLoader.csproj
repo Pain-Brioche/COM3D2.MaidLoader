@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>disable</Nullable>
+	<LangVersion>preview</LangVersion>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	<Configurations>Debug;Release;V3</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);V3</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='V3|AnyCPU'">
+    <DefineConstants>$(DefineConstants);V3</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);V3</DefineConstants>
+  </PropertyGroup>
+
+  <Import Project="..\COM3D2.MaidLoader.Core\COM3D2.MaidLoader.Core.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <PackageReference Include="COM3D2.GameLibs" Version="3.41.0-r.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CM3D2.Toolkit.Guest4168Branch">
+      <HintPath>..\..\COM3D2 Lib\CM3D2.Toolkit.Guest4168Branch.dll</HintPath>
+    </Reference>
+    <Reference Include="COM3D2.API">
+      <HintPath>..\..\COM3D2.5 Lib\COM3D2.API.dll</HintPath>
+    </Reference>
+    <Reference Include="COM3D2.ShortStartLoader">
+      <HintPath>..\..\COM3D2 Lib\COM3D2.ShortStartLoader-Publicized.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\COM3D2.5 Lib\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\COM3D2.5 Lib\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

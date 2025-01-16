@@ -36,7 +36,7 @@ namespace COM3D2.MaidLoader
         }
 
         //Overrides loading from ressource
-        [HarmonyPatch(typeof(Resources), nameof(Resources.Load))]
+/*        [HarmonyPatch(typeof(Resources), nameof(Resources.Load))]
         [HarmonyPatch(new Type[] { typeof(string) })]
         [HarmonyPrefix]
         public static bool LoadPrefix(string path, ref UnityEngine.Object __result)
@@ -50,7 +50,6 @@ namespace COM3D2.MaidLoader
                 return false;
             }
             return true;
-        }
-
+        }*/
     }
 }

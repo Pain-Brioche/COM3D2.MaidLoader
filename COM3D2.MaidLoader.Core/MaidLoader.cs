@@ -8,10 +8,15 @@ using UnityEngine.SceneManagement;
 
 namespace COM3D2.MaidLoader
 {
-    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.4.7")]
+    [BepInPlugin("COM3D2.MaidLoader", "Maid Loader", "1.5.0")]
     [BepInDependency("ShortStartLoader", BepInDependency.DependencyFlags.SoftDependency)]
+#if V2
     [BepInDependency("COM3D2.CornerMessage", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("deathweasel.com3d2.api", BepInDependency.DependencyFlags.HardDependency)]
+#elif V3
+    [BepInDependency(COM3D2API.Com3D2Api.PluginGuid, BepInDependency.DependencyFlags.HardDependency)]
+#endif
+
 
     public class MaidLoader : BaseUnityPlugin
     {
@@ -68,8 +73,10 @@ namespace COM3D2.MaidLoader
             // Check if ShortStartLoader is loaded
             SSL = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("ShortStartLoader");
 
+#if V2
             // Check if CornderMessage is loaded.
             CornerMessage.CornerMessageLoaded = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("COM3D2.CornerMessage");
+#endif
 
             // Add gear menu button
             SystemShortcutAPI.AddButton("RefreshMod", () =>
@@ -160,6 +167,7 @@ namespace COM3D2.MaidLoader
 
     }
 
+#if V2
     // CornerMessage support the way it's intended to be used.
     internal static class CornerMessage
     {
@@ -177,4 +185,11 @@ namespace COM3D2.MaidLoader
             internal static void DisplayMessage(string mess, float dur) => COM3D2.CornerMessage.CornerMessage.DisplayMessage(mess, dur);
         }
     }
+#elif V3
+        internal static class CornerMessage
+		{
+			internal static void DisplayMessage(string mess, float dur = 6f) => 
+			COM3D2API.UI.MessageApi.QueueCornerText(mess, dur);
+		}
+#endif
 }

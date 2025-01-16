@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>f5c27fab-ff4d-42c5-9db0-c83d197fd235</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>COM3D2.MaidLoader.Core</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)MaidLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Managers\ArcManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Managers\AssetManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Managers\ManManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Managers\NeiManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Managers\PmatManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModModules\EditModeUI.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModModules\ModPriority.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModModules\QuickMod.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModModules\QuickModFileSystem.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModModules\RefreshMod.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)MaidLoaderLogo.png" />
+    <None Include="$(MSBuildThisFileDirectory)QMRefreshIcon.png" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" />
+    <None Include="$(MSBuildThisFileDirectory)RefreshIcon.png" />
+  </ItemGroup>
+</Project>

@@ -7,8 +7,22 @@
     <Version>1.2.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
-    <Configurations>Debug;Release;Debug_Release</Configurations>
+    <Configurations>Debug;Release;Debug_Release;V3</Configurations>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);V2</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='V3|AnyCPU'">
+    <DefineConstants>$(DefineConstants);V2</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);V2</DefineConstants>
+  </PropertyGroup>
+
+	<Import Project="..\COM3D2.MaidLoader.Core\COM3D2.MaidLoader.Core.projitems" Label="Shared" />
 
   <ItemGroup>
     <Compile Remove="Libs\**" />
@@ -17,14 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Managers\SoundManager.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-    <PackageReference Include="COM3D2.GameLibs" Version="2.21.0-r.0" />
+    <PackageReference Include="COM3D2.GameLibs" Version="2.39.0-r.0" />
     <PackageReference Include="UnityEngine.Modules" Version="5.6.4" IncludeAssets="compile" />
   </ItemGroup>
   
@@ -34,19 +44,19 @@
   
   <ItemGroup>
     <Reference Include="CM3D2.Toolkit.Guest4168Branch">
-      <HintPath>..\COM3D2 Lib\CM3D2.Toolkit.Guest4168Branch.dll</HintPath>
+      <HintPath>..\..\COM3D2 Lib\CM3D2.Toolkit.Guest4168Branch.dll</HintPath>
     </Reference>
     <Reference Include="COM3D2.API">
-      <HintPath>..\COM3D2 Lib\COM3D2.API.dll</HintPath>
+      <HintPath>..\..\COM3D2 Lib\COM3D2.API.dll</HintPath>
     </Reference>
     <Reference Include="COM3D2.CornerMessage">
-      <HintPath>..\COM3D2 Lib\COM3D2.CornerMessage.dll</HintPath>
+      <HintPath>..\..\COM3D2 Lib\COM3D2.CornerMessage.dll</HintPath>
     </Reference>
     <Reference Include="COM3D2.ShortStartLoader">
-      <HintPath>..\COM3D2 Lib\COM3D2.ShortStartLoader-Publicized.dll</HintPath>
+      <HintPath>..\..\COM3D2 Lib\COM3D2.ShortStartLoader-Publicized.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading">
-      <HintPath>..\COM3D2 Lib\System.Threading.dll</HintPath>
+      <HintPath>..\..\COM3D2 Lib\System.Threading.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>
