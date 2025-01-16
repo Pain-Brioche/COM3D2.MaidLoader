@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5953B9EF-4D80-4CF3-A715-7E309953E9CB}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		COM3D2.MaidLoader.Core\README.md = COM3D2.MaidLoader.Core\README.md
 	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "COM3D2.MaidLoader.Core", "COM3D2.MaidLoader.Core\COM3D2.MaidLoader.Core.shproj", "{F5C27FAB-FF4D-42C5-9DB0-C83D197FD235}"
