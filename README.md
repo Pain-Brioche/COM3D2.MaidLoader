@@ -1,4 +1,3 @@
-![MaidLoader](MaidLoaderLogo.png)
 
 ## Introduction
 
